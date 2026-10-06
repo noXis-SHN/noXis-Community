@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>noXis.Community</title>
+    <style>
+        *{margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; transition:all 0.3s ease;}
+        :root{
+            --hitam:#0a0a0a; --putih:#ffffff;
+            --abu:#333333; --abu-terang:#888888;
+            --hijau:#00c853; --merah:#ff3333;
+        }
+        body{
+            background:var(--hitam); color:var(--putih);
+            min-height:100vh; display:flex; flex-direction:column;
+            align-items:center; justify-content:center; padding:20px;
+        }
+        .logo{font-size:2.8rem; font-weight:900; letter-spacing:3px; margin-bottom:10px;}
+        .logo span{color:var(--abu-terang); font-weight:300;}
+        .sub{color:var(--abu-terang); margin-bottom:50px;}
+        .container{display:flex; flex-direction:column; gap:20px; width:100%; max-width:350px;}
+        .btn{
+            padding:18px 25px; border:2px solid var(--putih); background:transparent;
+            color:var(--putih); font-size:1.1rem; font-weight:600; border-radius:8px;
+            cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;
+            text-decoration:none;
+        }
+        .btn:hover{background:var(--putih); color:var(--hitam); transform:scale(1.03);}
+        .btn.kunci{
+            border-color:var(--abu); color:var(--abu); cursor:not-allowed;
+            opacity:0.6; transform:none; pointer-events:none;
+        }
+        .btn.kunci:hover{background:transparent; color:var(--abu);}
+        .btn.aktif{border-color:var(--hijau); color:var(--hijau);}
+        .btn.aktif:hover{background:var(--hijau); color:var(--putih);}
+        .status{margin-top:40px; padding:15px 25px; border-radius:6px; text-align:center;}
+        .status.off{background:rgba(255,51,51,0.15); color:var(--merah);}
+        .status.on{background:rgba(0,200,83,0.15); color:var(--hijau);}
+    </style>
+</head>
+<body>
+
+    <h1 class="logo">noXis<span>.Community</span></h1>
+    <p class="sub">Komunitas Pengembang & Kreator</p>
+
+    <div class="container">
+        <!-- TOMBOL INFO -->
+        <a class="btn" id="btnInfo" href="#">ℹ️ Info</a>
+
+        <!-- TOMBOL DOWNLOAD -->
+        <a class="btn kunci" id="btnDownload" href="#" target="_blank">
+            ⬇️ Download
+        </a>
+
+        <!-- TOMBOL AKTIFKAN -->
+        <a class="btn aktif" id="btnAktif" href="aktifkan.html">
+            🔓 Aktifkan Web
+        </a>
+    </div>
+
+    <div class="status off" id="statusBox">
+        ⚠️ Website Belum Diaktifkan
+    </div>
+
+<script>
+// ==================================================
+// 🔧 PENGATURAN — UBAH LINK DI BAWAH INI
+// ==================================================
+const linkInfo     = "info.html";          // Bisa ganti link luar juga
+const linkDownload = "https://link-kamu-disini.com"; // Link download-mu
+const linkSetelahAktif = "info.html";      // Tujuan setelah aktif
+// ==================================================
+
+const sudahAktif = localStorage.getItem("noxis_aktif") === "true";
+
+// Pasang link ke tombol
+document.getElementById("btnInfo").href = linkInfo;
+
+if(sudahAktif){
+    // Buka kunci Download
+    const btnD = document.getElementById("btnDownload");
+    btnD.classList.remove("kunci");
+    btnD.href = linkDownload;
+    btnD.style.pointerEvents = "auto";
+
+    // Sembunyikan tombol Aktifkan
+    document.getElementById("btnAktif").style.display = "none";
+
+    // Ubah status
+    const st = document.getElementById("statusBox");
+    st.className = "status on";
+    st.innerHTML = "✅ Website Sudah Aktif!";
+}
+</script>
+
+</body>
+</html>

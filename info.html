@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Info — noXis.Community</title>
+    <style>
+        *{margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; transition:all 0.3s ease;}
+        :root{
+            --hitam:#0a0a0a; --putih:#ffffff;
+            --abu:#333333; --abu-terang:#888888;
+            --ungu:#7928ca;
+        }
+        body{
+            background:var(--hitam); color:var(--putih);
+            min-height:100vh; padding:40px 25px;
+        }
+        .kembali{
+            display:inline-flex; align-items:center; gap:8px;
+            color:var(--abu-terang); text-decoration:none;
+            margin-bottom:40px; font-weight:500;
+        }
+        .kembali:hover{color:var(--putih); transform:translateX(-3px);}
+        .judul{font-size:2.5rem; font-weight:900; margin-bottom:5px;}
+        .judul span{color:var(--abu-terang); font-weight:300;}
+        .garis{width:100px; height:3px; background:var(--ungu); margin:15px 0 30px; border-radius:2px;}
+        .kotak-info{
+            background:#151515; padding:30px; border-radius:12px;
+            border-left:4px solid var(--ungu); line-height:1.8;
+            max-width:500px;
+        }
+        .kotak-info h2{font-size:1.3rem; margin:20px 0 10px; color:#ddd;}
+        .kotak-info p{color:#eee; font-size:1.05rem;}
+        .salam{
+            font-size:1.5rem; font-weight:bold; color:var(--ungu);
+            margin:25px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="kembali">← Kembali ke Beranda</a>
+
+    <h1 class="judul">noXis<span>.Info</span></h1>
+    <div class="garis"></div>
+
+    <div class="kotak-info">
+        <p class="salam">noXis: hello broo 👋</p>
+
+        <h2>Tentang noXis.Community</h2>
+        <p>
+            Selamat datang di komunitas resmi noXis!<br>
+            Tempat berkumpul para kreator, pengembang, dan sahabat seperjuangan.
+        </p>
+
+        <h2>Versi</h2>
+        <p>v1.0 — Edisi Pertama</p>
+
+        <h2>Pembuat</h2>
+        <p>Dengan ❤️ oleh tim noXis</p>
+
+        <h2>Status</h2>
+        <p id="statusInfo">Belum Diaktifkan</p>
+
+        <h2>Pesan</h2>
+        <p>
+            Tetap semangat berkarya! 🚀<br>
+            Sampai jumpa di proyek selanjutnya...
+        </p>
+    </div>
+
+<script>
+// Cek status aktif & tampilkan
+const aktif = localStorage.getItem("noxis_aktif") === "true";
+document.getElementById("statusInfo").textContent = aktif ? "✅ Sudah Aktif" : "⏳ Belum Diaktifkan";
+</script>
+
+</body>
+</html>

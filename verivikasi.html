@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aktifkan — noXis.Community</title>
+    <style>
+        *{margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; transition:all 0.25s ease;}
+        :root{
+            --hitam:#0a0a0a; --putih:#ffffff; --abu:#222;
+            --batas:#444; --hijau:#00c853; --merah:#ff3333;
+        }
+        body{
+            background:var(--hitam); color:var(--putih);
+            min-height:100vh; display:flex; flex-direction:column;
+            align-items:center; padding:30px 20px;
+        }
+        h1{font-size:1.8rem; margin-bottom:5px;}
+        .desk{color:#aaa; margin-bottom:30px;}
+        .kotak{
+            background:var(--abu); padding:30px; border-radius:12px;
+            width:100%; max-width:420px; margin-bottom:25px;
+        }
+        .judul{font-weight:600; margin-bottom:12px; display:flex; justify-content:space-between;}
+        .ok{color:var(--hijau);} .belum{color:var(--merah);}
+        
+        /* PUZZLE */
+        .papan{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; max-width:240px; margin:0 auto;}
+        .kotak-angka{
+            width:70px; height:70px; background:#333; border:2px solid #555;
+            display:flex; align-items:center; justify-content:center; font-size:1.4rem;
+            font-weight:bold; border-radius:6px; cursor:pointer;
+        }
+        .kotak-angka:hover{border-color:var(--putih); background:#444;}
+        .kosong{background:transparent; border:none; cursor:default;}
+        .kosong:hover{background:transparent; border:none;}
+
+        /* VERIFIKASI */
+        .lingkaran{
+            width:60px; height:60px; border:4px solid #333;
+            border-top-color:var(--putih); border-radius:50%;
+            animation:putar 1s linear infinite; margin:10px auto;
+        }
+        @keyframes putar{to{transform:rotate(360deg);}}
+        .btn-umum{
+            width:100%; padding:15px; font-size:1.1rem; font-weight:bold;
+            border:none; border-radius:8px; cursor:pointer; margin-top:10px;
+        }
+        .terkunci{background:#333; color:#777; cursor:not-allowed;}
+        .siap{background:var(--hijau); color:white;}
+        .siap:hover{transform:scale(1.02);}
+        .kembali{background:transparent; border:2px solid #555; color:#aaa; margin-top:20px;}
+        .sudah-aktif{text-align:center; padding:40px 20px;}
+        .sudah-aktif h2{color:var(--hijau); font-size:1.8rem; margin-bottom:15px;}
+    </style>
+</head>
+<body>
+
+    <h1>Aktifkan Website</h1>
+    <p class="desk">Selesaikan 2 syarat untuk membuka akses selamanya</p>
+
+    <!-- JIKA SUDAH AKTIF → TAMPIL PESAN SAJA -->
+    <div id="blokSudahAktif" style="display:none;" class="sudah-aktif">
+        <h2>✅ Sudah Aktif Selamanya!</h2>
+        <p style="color:#aaa; margin-bottom:25px;">Website kamu sudah aktif dan tetap aktif selamanya.</p>
+        <a href="index.html" class="btn-umum siap">← Kembali ke Beranda</a>
+    </div>
+
+    <div id="blokSyarat">
+        <!-- SYARAT 1: PUZZLE -->
+        <div class="kotak">
+            <div class="judul">
+                <span>1️⃣ Susun Angka 1-8</span>
+                <span id="s1status" class="belum">Belum</span>
+            </div>
+            <p style="color:#888; font-size:0.9rem; margin-bottom:15px;">Tekan angka di sebelah kotak kosong untuk memindahkan</p>
+            <div class="papan" id="papanPuzzle"></div>
+        </div>
+
+        <!-- SYARAT 2: VERIFIKASI -->
+        <div class="kotak">
+            <div class="judul">
+                <span>2️⃣ I'm Not a Robot</span>
+                <span id="s2status" class="belum">Belum</span>
+            </div>
+            <button class="btn-umum" id="btnVerif" onclick="mulaiVerif()">✅ Saya Bukan Robot</button>
+            <div id="areaVerif" style="text-align:center; margin-top:15px; display:none;">
+                <div class="lingkaran" id="putaran"></div>
+                <p id="teksVerif" style="color:#aaa;">Sedang memverifikasi...</p>
+            </div>
+        </div>
+
+        <!-- TOMBOL AKTIFKAN -->
+        <button class="btn-umum terkunci" id="btnAkhir" disabled>
+            🔒 Selesaikan Syarat Dulu
+        </button>
+        <button class="btn-umum siap" id="btnAktifkan" style="display:none;" onclick="aktifkanWeb()">
+            🔓 Aktifkan Selamanya
+        </button>
+
+        <a href="index.html" class="btn-umum kembali">← Kembali ke Beranda</a>
+    </div>
+
+<script>
+// === CEK SUDAH AKTIF? ===
+const sudahAktif = localStorage.getItem("noxis_aktif") === "true";
+
+if(sudahAktif){
+    // Langsung tampil pesan sudah aktif — sembunyikan syarat
+    document.getElementById("blokSyarat").style.display = "none";
+    document.getElementById("blokSudahAktif").style.display = "block";
+} else {
+    // Tampilkan syarat
+    let s1Lulus = false, s2Lulus = false;
+    let urutan = [1,2,3,4,5,6,7,0,8];
+
+    // === PUZZLE ===
+    function acakPuzzle(){
+        let arr = [1,2,3,4,5,6,7,8,0];
+        for(let i=0; i<30; i++){
+            let kosong = arr.indexOf(0);
+            let tetangga = [];
+            if(kosong%3!==0) tetangga.push(kosong-1);
+            if(kosong%3!==2) tetangga.push(kosong+1);
+            if(kosong>=3) tetangga.push(kosong-3);
+            if(kosong<=5) tetangga.push(kosong+3);
+            let pindah = tetangga[Math.floor(Math.random()*tetangga.length)];
+            [arr[kosong], arr[pindah]] = [arr[pindah], arr[kosong]];
+        }
+        urutan = arr;
+        tampilPuzzle();
+    }
+
+    function tampilPuzzle(){
+        const papan = document.getElementById("papanPuzzle");
+        papan.innerHTML = "";
+        urutan.forEach((angka, i)=>{
+            const el = document.createElement("div");
+            el.className = "kotak-angka" + (angka===0?" kosong":"");
+            el.textContent = angka||"";
+            if(angka!==0) el.onclick = ()=>pindahAngka(i);
+            papan.appendChild(el);
+        });
+        cekSelesai();
+    }
+
+    function pindahAngka(indeks){
+        const kosong = urutan.indexOf(0);
+        const boleh = (
+            (indeks === kosong-1 && kosong%3!==0) ||
+            (indeks === kosong+1 && kosong%3!==2) ||
+            indeks === kosong-3 || indeks === kosong+3
+        );
+        if(boleh){
+            [urutan[indeks], urutan[kosong]] = [urutan[kosong], urutan[indeks]];
+            tampilPuzzle();
+        }
+    }
+
+    function cekSelesai(){
+        if(urutan.join("") === "123456780"){
+            s1Lulus = true;
+            document.getElementById("s1status").className = "ok";
+            document.getElementById("s1status").textContent = "✓ Selesai";
+            cekSemua();
+        }
+    }
+
+    // === VERIFIKASI ===
+    function mulaiVerif(){
+        document.getElementById("btnVerif").style.display = "none";
+        document.getElementById("areaVerif").style.display = "block";
+        setTimeout(()=>{
+            s2Lulus = true;
+            document.getElementById("s2status").className = "ok";
+            document.getElementById("s2status").textContent = "✓ Terverifikasi";
+            document.getElementById("putaran").style.animation = "none";
+            document.getElementById("teksVerif").textContent = "Berhasil!";
+            cekSemua();
+        }, 15000);
+    }
+
+    // === CEK SEMUA SYARAT ===
+    function cekSemua(){
+        if(s1Lulus && s2Lulus){
+            document.getElementById("btnAkhir").style.display = "none";
+            document.getElementById("btnAktifkan").style.display = "block";
+        }
+    }
+
+    // === KUNCI AKTIF SELAMANYA ===
+    function aktifkanWeb(){
+        // Simpan SELAMANYA di penyimpanan perangkat
+        localStorage.setItem("noxis_aktif", "true");
+        
+        alert("🎉 SELAMAT!\nWebsite sudah diaktifkan SELAMANYA!\nTidak perlu mengulang lagi.");
+        window.location.href = "index.html";
+    }
+
+    // Mulai
+    acakPuzzle();
+}
+</script>
+
+</body>
+</html>
