@@ -53,6 +53,11 @@
             ⬇️ Download
         </a>
 
+        <!-- TOMBOL CAVEGAME SHD PC -->
+        <a class="btn kunci" id="btnCaveGame" href="#" target="_blank">
+            🎮 CaveGame SHD PC
+        </a>
+
         <!-- TOMBOL AKTIFKAN -->
         <a class="btn aktif" id="btnAktif" href="verivikasi.html">
             🔓 Aktifkan Web
@@ -67,14 +72,14 @@
 // ==================================================
 // 🔧 PENGATURAN — UBAH LINK DI BAWAH INI
 // ==================================================
-const linkInfo     = "https://noxis-shn.github.io/noXis-Community/info.html";          // Bisa ganti link luar juga
-const linkDownload = "https://linktr.ee/noXisLinktree"; // Link download-mu
-const linkSetelahAktif = "https://noxis-shn.github.io/noXis-Community/verivikasi.html";      // Tujuan setelah aktif
+const linkInfo     = "https://noxis-shn.github.io/noXis-Community/info.html";
+const linkDownload = "https://linktr.ee/noXisLinktree";
+const linkCaveGame = "https://noxis-shn.github.io/noXis-Community/minecraft_pc.html"; // ✅ Link sudah diganti!
+const linkSetelahAktif = "https://noxis-shn.github.io/noXis-Community/verivikasi.html";
 // ==================================================
 
 const sudahAktif = localStorage.getItem("noxis_aktif") === "true";
 
-// Pasang link ke tombol
 document.getElementById("btnInfo").href = linkInfo;
 
 if(sudahAktif){
@@ -83,6 +88,12 @@ if(sudahAktif){
     btnD.classList.remove("kunci");
     btnD.href = linkDownload;
     btnD.style.pointerEvents = "auto";
+
+    // Buka kunci CaveGame
+    const btnC = document.getElementById("btnCaveGame");
+    btnC.classList.remove("kunci");
+    btnC.href = linkCaveGame;
+    btnC.style.pointerEvents = "auto";
 
     // Sembunyikan tombol Aktifkan
     document.getElementById("btnAktif").style.display = "none";
