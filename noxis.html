@@ -36,7 +36,7 @@
             font-size: 2.5rem;
             font-weight: 600;
             letter-spacing: 4px;
-            margin-bottom: 60px;
+            margin-bottom: 40px;
             text-align: center;
             animation: textGrayWhite 3s ease-in-out infinite;
         }
@@ -47,12 +47,20 @@
             100% { color: #ffffff; }
         }
 
+        .main-image {
+            width: 95%;
+            max-width: 600px;
+            border-radius: 8px;
+            margin-bottom: 50px;
+            border: 2px solid #333;
+        }
+
         .buttons-container {
             display: flex;
             gap: 30px;
             flex-wrap: wrap;
             justify-content: center;
-            margin-bottom: 60px;
+            margin-bottom: 30px;
         }
 
         .btn-wrapper {
@@ -96,6 +104,12 @@
 
         .download-btn:hover {
             color: #cccccc;
+        }
+
+        .hint-text {
+            color: #666666;
+            font-size: 0.9rem;
+            margin-bottom: 50px;
         }
 
         .description-section {
@@ -196,6 +210,13 @@
 
     <div class="home-page" id="homePage">
         <h1>noXis.Community</h1>
+
+        <img 
+            src="https://cdn.phototourl.com/member/2026-10-20-7effec5e-95c9-4bb7-8779-a9b7231106b9.png" 
+            alt="CaveGame" 
+            class="main-image"
+        >
+
         <div class="buttons-container">
             <div class="btn-wrapper">
                 <a href="https://www.mediafire.com/file/k97shlx8cala2k2/CaveGame.apk/file" style="text-decoration: none;">
@@ -207,6 +228,8 @@
             </div>
         </div>
 
+        <p class="hint-text">💡 Tekan tombol <strong>N</strong> di keyboard untuk masuk layar penuh kapan saja</p>
+
         <div class="description-section">
             <h2>Tentang noXis.Community</h2>
             <p>noXis.Community adalah komunitas terbuka bagi para pengembang, kreator, dan pemain game. Kami berfokus pada pengembangan proyek game independen, berbagi pengetahuan, dan menciptakan ruang kolaborasi yang kreatif serta inovatif bagi siapa saja yang ingin belajar, berkarya, dan berbagi.</p>
@@ -217,11 +240,12 @@
 
         <div class="info-box">
             <h3>📋 Informasi Tambahan</h3>
-            <p><strong>Versi:</strong> 1.0.0</p>
+            <p><strong>Versi Offline:</strong> 1.9.9 untuk Android)</p>
+            <p><strong>Versi Web:</strong> 2.1.9 (untuk versi Beta dan PC)</p>
             <p><strong>Terakhir Diperbarui:</strong> 20 Oktober 2026</p>
             <p><strong>Pengembang:</strong> noXis Team</p>
             <p><strong>Lisensi:</strong> Komunitas noXis</p>
-            <p><strong>Kontak:</strong> Buka diskusi di halaman komunitas</p>
+            <p><strong>Berita & Update:</strong> Belum ada informasi</p>
         </div>
 
     </div>
@@ -232,7 +256,10 @@
     </div>
 
     <script>
+        let currentUrl = '';
+
         async function openFull(url) {
+            currentUrl = url;
             const homePage = document.getElementById("homePage");
             const fullContainer = document.getElementById("fullContainer");
             const fullFrame = document.getElementById("fullFrame");
@@ -241,7 +268,6 @@
             homePage.classList.add("hidden");
             fullContainer.classList.add("active");
             
-            // Masuk ke mode layar penuh browser
             try {
                 if (document.documentElement.requestFullscreen) {
                     await document.documentElement.requestFullscreen();
@@ -264,7 +290,6 @@
             fullContainer.classList.remove("active");
             homePage.classList.remove("hidden");
             
-            // Keluar dari mode layar penuh
             try {
                 if (document.exitFullscreen) {
                     await document.exitFullscreen();
@@ -274,9 +299,26 @@
                     await document.msExitFullscreen();
                 }
             } catch (err) {
-                console.log("Keluar layar penuh tidak tersedia");
+                console.log("Sudah keluar dari layar penuh");
             }
         }
+
+        // Tekan tombol N untuk masuk layar penuh lagi
+        document.addEventListener('keydown', async function(e) {
+            if ((e.key === 'n' || e.key === 'N') && currentUrl && !document.fullscreenElement) {
+                try {
+                    if (document.documentElement.requestFullscreen) {
+                        await document.documentElement.requestFullscreen();
+                    } else if (document.documentElement.webkitRequestFullscreen) {
+                        await document.documentElement.webkitRequestFullscreen();
+                    } else if (document.documentElement.msRequestFullscreen) {
+                        await document.documentElement.msRequestFullscreen();
+                    }
+                } catch (err) {
+                    console.log("Tidak bisa masuk layar penuh");
+                }
+            }
+        });
     </script>
     
 </body>
