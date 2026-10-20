@@ -5,292 +5,279 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>noXis.Community</title>
     <style>
-        *{margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif;}
-        :root{
-            --hitam:#0a0a0a; --putih:#ffffff;
-            --abu:#333333; --abu-terang:#888888;
-            --hijau:#00c853; --merah:#ff3333; --kuning:#ffc107;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
         }
-        body{
-            background:var(--hitam); color:var(--putih);
-            min-height:100vh; display:flex; flex-direction:column;
-            align-items:center; justify-content:center; padding:20px;
+
+        .home-page {
+            width: 100vw;
+            min-height: 100vh;
+            background-color: #000000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px 20px 80px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            transition: opacity 0.3s ease;
         }
-        .logo{font-size:2.8rem; font-weight:900; letter-spacing:3px; margin-bottom:10px; text-align:center;}
-        .logo span{color:var(--abu-terang); font-weight:300;}
-        .sub{color:var(--abu-terang); margin-bottom:50px; text-align:center;}
-        .container{display:flex; flex-direction:column; gap:20px; width:100%; max-width:350px;}
-        .btn{
-            padding:18px 25px; border:2px solid var(--putih); background:transparent;
-            color:var(--putih); font-size:1.1rem; font-weight:600; border-radius:8px;
-            cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;
-            text-decoration:none;
+
+        .home-page.hidden {
+            opacity: 0;
+            visibility: hidden;
         }
-        .btn:hover{background:var(--putih); color:var(--hitam); transform:scale(1.03);}
-        .btn.kunci{
-            border-color:var(--abu); color:var(--abu); cursor:not-allowed;
-            opacity:0.6; pointer-events:none;
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            letter-spacing: 4px;
+            margin-bottom: 60px;
+            text-align: center;
+            animation: textGrayWhite 3s ease-in-out infinite;
         }
-        .btn.kunci:hover{background:transparent; color:var(--abu);}
-        .btn.aktif{border-color:var(--hijau); color:var(--hijau);}
-        .btn.aktif:hover{background:var(--hijau); color:var(--putih);}
-        .status{margin-top:40px; padding:15px 25px; border-radius:6px; text-align:center;}
-        .status.off{background:rgba(255,51,51,0.15); color:var(--merah);}
-        .status.on{background:rgba(0,200,83,0.15); color:var(--hijau);}
-        
-        /* ✅ Tampilan Halaman */
-        .page-container{
-            position:fixed; top:0; left:0; width:100%; height:100vh;
-            background:var(--hitam); z-index:100; display:none; flex-direction:column;
+
+        @keyframes textGrayWhite {
+            0% { color: #ffffff; }
+            50% { color: #b8b8b8; }
+            100% { color: #ffffff; }
         }
-        .page-header{
-            padding:15px 20px; background:var(--abu); display:flex; align-items:center; justify-content:space-between;
-            border-bottom:2px solid var(--putih);
+
+        .buttons-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 60px;
         }
-        .back-btn{
-            padding:8px 20px; background:var(--merah); color:var(--putih); border:none;
-            border-radius:6px; cursor:pointer; font-size:1rem; font-weight:600;
+
+        .btn-wrapper {
+            position: relative;
+            border-radius: 4px;
         }
-        .back-btn:hover{background:#e02b2b;}
-        .page-title{font-size:1.2rem; font-weight:600;}
-        
-        /* ✅ Area Konten + Tombol Penuh */
-        .content-wrapper{position:relative; flex:1; display:flex; flex-direction:column;}
-        .fullscreen-btn{
-            position:absolute; top:15px; right:80px; z-index:10;
-            padding:8px 15px; background:rgba(0,0,0,0.7); color:var(--putih);
-            border:1px solid var(--putih); border-radius:6px; cursor:pointer;
-            font-size:0.9rem; font-weight:600;
+
+        .btn-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: linear-gradient(90deg, #ffffff, #888888, #ffffff, #888888, #ffffff);
+            background-size: 300% 300%;
+            border-radius: 6px;
+            z-index: -1;
+            animation: borderRotate 3s linear infinite;
         }
-        .fullscreen-btn:hover{background:rgba(255,255,255,0.2);}
-        .exit-fullscreen-btn{
-            position:absolute; top:15px; right:80px; z-index:10;
-            padding:8px 15px; background:var(--kuning); color:#000;
-            border:none; border-radius:6px; cursor:pointer;
-            font-size:0.9rem; font-weight:700; display:none;
+
+        @keyframes borderRotate {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
         }
-        .exit-fullscreen-btn:hover{background:#ffb300;}
-        .content-frame{
-            flex:1; border:none; width:100%; background:#fff;
+
+        .download-btn {
+            padding: 16px 40px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #ffffff;
+            background-color: #000000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+            white-space: nowrap;
         }
-        
-        /* ✅ Halaman Peringatan Linktree */
-        .external-page{
-            flex:1; display:flex; flex-direction:column; align-items:center;
-            justify-content:center; padding:30px; text-align:center;
+
+        .download-btn:hover {
+            color: #cccccc;
         }
-        .external-icon{font-size:4rem; margin-bottom:20px;}
-        .external-title{font-size:1.5rem; margin-bottom:10px;}
-        .external-desc{color:var(--abu-terang); margin-bottom:30px; max-width:300px;}
-        .open-external-btn{
-            padding:15px 30px; background:var(--kuning); color:#000;
-            border-radius:6px; font-weight:700; text-decoration:none;
+
+        .description-section {
+            width: 95%;
+            max-width: 700px;
+            color: #e0e0e0;
+            line-height: 1.8;
         }
-        .open-external-btn:hover{background:#ffb300;}
-        
-        /* ✅ Mode Penuh */
-        .content-wrapper:-webkit-full-screen {width:100%; height:100%;}
-        .content-wrapper:-ms-fullscreen {width:100%; height:100%;}
-        .content-wrapper:fullscreen {width:100%; height:100%;}
-        
-        /* ✅ Pastikan halaman utama selalu terlihat benar */
-        #mainPage{width:100%; display:flex; flex-direction:column; align-items:center;}
+
+        .description-section h2 {
+            font-size: 1.3rem;
+            color: #ffffff;
+            margin-bottom: 12px;
+            margin-top: 28px;
+        }
+
+        .description-section h2:first-child {
+            margin-top: 0;
+        }
+
+        .description-section p {
+            font-size: 0.98rem;
+            color: #b8b8b8;
+        }
+
+        .info-box {
+            width: 95%;
+            max-width: 700px;
+            margin-top: 40px;
+            padding: 25px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            background-color: #0a0a0a;
+        }
+
+        .info-box h3 {
+            font-size: 1.1rem;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .info-box p {
+            font-size: 0.95rem;
+            color: #999999;
+            margin-bottom: 8px;
+        }
+
+        .info-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .fullscreen-container {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+            background-color: #000;
+        }
+
+        .fullscreen-container.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 10;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 24px;
+            font-size: 0.95rem;
+            color: #ffffff;
+            background-color: rgba(0, 0, 0, 0.6);
+            border: 2px solid #ffffff;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 11;
+            transition: all 0.25s ease;
+        }
+
+        .back-btn:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .fullscreen-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
     </style>
 </head>
 <body>
 
-    <!-- ✅ Tampilan Utama -->
-    <div id="mainPage">
-        <h1 class="logo">noXis<span>.Community</span></h1>
-        <p class="sub">Komunitas Pengembang & Kreator</p>
-
-        <div class="container">
-            <a class="btn" id="btnInfo" href="#">ℹ️ Info</a>
-            <a class="btn kunci" id="btnDownload" href="#">⬇️ Download</a>
-            <a class="btn kunci" id="btnCaveGame" href="#">🎮 CaveGame SHD PC</a>
-            <a class="btn aktif" id="btnAktif" href="#">🔓 Aktifkan Web</a>
-        </div>
-
-        <div class="status off" id="statusBox">
-            ⚠️ Website Belum Diaktifkan
-        </div>
-    </div>
-
-    <!-- ✅ Kontainer Halaman -->
-    <div class="page-container" id="pageContainer">
-        <div class="page-header">
-            <button class="back-btn" id="backBtn">← Kembali</button>
-            <span class="page-title" id="pageTitle">Halaman</span>
-            <span></span>
-        </div>
-        <!-- ✅ Area Konten dengan Tombol Penuh -->
-        <div class="content-wrapper" id="contentWrapper">
-            <button class="fullscreen-btn" id="fullscreenBtn" style="display:none;">⛶ Layar Penuh</button>
-            <button class="exit-fullscreen-btn" id="exitFullscreenBtn">🗗 Kembali ke Web</button>
-            <iframe class="content-frame" id="contentFrame" src="" style="display:none;"></iframe>
-            <div id="externalNotice" class="external-page" style="display:none;">
-                <div class="external-icon">🔗</div>
-                <h3 class="external-title" id="extTitle">Situs Eksternal</h3>
-                <p class="external-desc" id="extDesc">Situs ini tidak dapat ditampilkan di dalam aplikasi karena pembatasan keamanan dari situs tersebut.</p>
-                <a class="open-external-btn" id="extLink" href="" target="_blank">🌐 Buka di Tab Baru</a>
+    <div class="home-page" id="homePage">
+        <h1>noXis.Community</h1>
+        <div class="buttons-container">
+            <div class="btn-wrapper">
+                <a href="https://www.mediafire.com/file/k97shlx8cala2k2/CaveGame.apk/file" style="text-decoration: none;">
+                    <button class="download-btn">Download Android</button>
+                </a>
+            </div>
+            <div class="btn-wrapper">
+                <button class="download-btn" onclick="openFull('https://noxis-shn.github.io/noXis-Community/minecraft_pc.html')">CaveGame SHD PC</button>
             </div>
         </div>
+
+        <div class="description-section">
+            <h2>Tentang noXis.Community</h2>
+            <p>noXis.Community adalah komunitas terbuka bagi para pengembang, kreator, dan pemain game. Kami berfokus pada pengembangan proyek game independen, berbagi pengetahuan, dan menciptakan ruang kolaborasi yang kreatif serta inovatif bagi siapa saja yang ingin belajar, berkarya, dan berbagi.</p>
+
+            <h2>Tentang CaveGame</h2>
+            <p>CaveGame adalah game eksplorasi dan pembangunan dunia yang dikembangkan oleh komunitas noXis. Jelajahi gua yang dalam, kumpulkan sumber daya, bangun tempat tinggal, dan ciptakan duniamu sendiri. Versi SHD menghadirkan grafik super realistis dengan pencahayaan yang indah, air yang jernih, dan bayangan yang halus untuk pengalaman bermain yang lebih memukau.</p>
+        </div>
+
+        <div class="info-box">
+            <h3>📋 Informasi Tambahan</h3>
+            <p><strong>Versi:</strong> 1.0.0</p>
+            <p><strong>Terakhir Diperbarui:</strong> 20 Oktober 2026</p>
+            <p><strong>Pengembang:</strong> noXis Team</p>
+            <p><strong>Lisensi:</strong> Komunitas noXis</p>
+            <p><strong>Kontak:</strong> Buka diskusi di halaman komunitas</p>
+        </div>
+
     </div>
 
-<script>
-// ==================================================
-// 🔧 PENGATURAN
-// ==================================================
-const linkInfo     = "https://noxis-shn.github.io/noXis-Community/info.html";
-const linkDownload = "https://linktr.ee/noXisLinktree";
-const linkCaveGame = "https://noxis-shn.github.io/noXis-Community/minecraft_pc.html";
-const linkVerivikasi = "verivikasi.html";
-// ==================================================
+    <div class="fullscreen-container" id="fullContainer">
+        <button class="back-btn" onclick="goBack()">Kembali</button>
+        <iframe class="fullscreen-frame" id="fullFrame" src=""></iframe>
+    </div>
 
-const sudahAktif = localStorage.getItem("noxis_aktif") === "true";
-const mainPage = document.getElementById("mainPage");
-const pageContainer = document.getElementById("pageContainer");
-const contentFrame = document.getElementById("contentFrame");
-const externalNotice = document.getElementById("externalNotice");
-const pageTitle = document.getElementById("pageTitle");
-const backBtn = document.getElementById("backBtn");
-const extTitle = document.getElementById("extTitle");
-const extDesc = document.getElementById("extDesc");
-const extLink = document.getElementById("extLink");
-const contentWrapper = document.getElementById("contentWrapper");
-const fullscreenBtn = document.getElementById("fullscreenBtn");
-const exitFullscreenBtn = document.getElementById("exitFullscreenBtn");
-
-// ✅ Deteksi situs yang tidak bisa di-iframe
-function isExternalSite(url){
-    return url.includes("linktr.ee") || url.includes("linktree.me") || url.includes("linktree.com");
-}
-
-// ✅ Fungsi buka halaman
-function bukaHalaman(url, judul){
-    mainPage.style.display = "none";
-    pageContainer.style.display = "flex";
-    pageTitle.textContent = judul;
-    
-    // Sembunyikan tombol layar penuh secara default
-    fullscreenBtn.style.display = "none";
-    
-    // Cek apakah situs eksternal seperti Linktree
-    if(isExternalSite(url)){
-        contentFrame.style.display = "none";
-        externalNotice.style.display = "flex";
-        extTitle.textContent = judul;
-        extDesc.textContent = "Linktree tidak dapat ditampilkan di dalam halaman ini karena pembatasan keamanan dari Linktree. Silakan tekan tombol di bawah untuk membukanya di tab baru.";
-        extLink.href = url;
-    } else {
-        externalNotice.style.display = "none";
-        contentFrame.style.display = "block";
-        contentFrame.src = url;
-        
-        // ✅ Tampilkan tombol layar penuh HANYA di halaman CaveGame
-        if(judul === "CaveGame SHD PC"){
-            fullscreenBtn.style.display = "block";
+    <script>
+        async function openFull(url) {
+            const homePage = document.getElementById("homePage");
+            const fullContainer = document.getElementById("fullContainer");
+            const fullFrame = document.getElementById("fullFrame");
+            
+            fullFrame.src = url;
+            homePage.classList.add("hidden");
+            fullContainer.classList.add("active");
+            
+            // Masuk ke mode layar penuh browser
+            try {
+                if (document.documentElement.requestFullscreen) {
+                    await document.documentElement.requestFullscreen();
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    await document.documentElement.webkitRequestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) {
+                    await document.documentElement.msRequestFullscreen();
+                }
+            } catch (err) {
+                console.log("Mode layar penuh tidak tersedia");
+            }
         }
-    }
-}
 
-// ✅ Fungsi kembali
-function kembaliUtama(){
-    keluarLayarPenuh(); // Pastikan keluar dari layar penuh dulu
-    contentFrame.src = "";
-    pageContainer.style.display = "none";
-    mainPage.style.display = "flex";
-    mainPage.style.flexDirection = "column";
-}
-
-// ✅ Fungsi Masuk Layar Penuh
-function masukLayarPenuh(){
-    if(contentWrapper.requestFullscreen){
-        contentWrapper.requestFullscreen();
-    } else if(contentWrapper.webkitRequestFullscreen){
-        contentWrapper.webkitRequestFullscreen();
-    } else if(contentWrapper.msRequestFullscreen){
-        contentWrapper.msRequestFullscreen();
-    }
-}
-
-// ✅ Fungsi Keluar Layar Penuh
-function keluarLayarPenuh(){
-    if(document.exitFullscreen){
-        document.exitFullscreen();
-    } else if(document.webkitExitFullscreen){
-        document.webkitExitFullscreen();
-    } else if(document.msExitFullscreen){
-        document.msExitFullscreen();
-    }
-}
-
-// ✅ Pantau perubahan status layar penuh
-function updateFullscreenUI(){
-    const isFull = document.fullscreenElement || 
-                   document.webkitFullscreenElement || 
-                   document.msFullscreenElement;
-    
-    if(isFull){
-        fullscreenBtn.style.display = "none";
-        exitFullscreenBtn.style.display = "block";
-    } else {
-        // Tampilkan tombol layar penuh hanya di halaman CaveGame
-        if(pageTitle.textContent === "CaveGame SHD PC"){
-            fullscreenBtn.style.display = "block";
+        async function goBack() {
+            const homePage = document.getElementById("homePage");
+            const fullContainer = document.getElementById("fullContainer");
+            const fullFrame = document.getElementById("fullFrame");
+            
+            fullFrame.src = "";
+            fullContainer.classList.remove("active");
+            homePage.classList.remove("hidden");
+            
+            // Keluar dari mode layar penuh
+            try {
+                if (document.exitFullscreen) {
+                    await document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    await document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    await document.msExitFullscreen();
+                }
+            } catch (err) {
+                console.log("Keluar layar penuh tidak tersedia");
+            }
         }
-        exitFullscreenBtn.style.display = "none";
-    }
-}
-
-// Event tombol
-backBtn.addEventListener("click", kembaliUtama);
-fullscreenBtn.addEventListener("click", masukLayarPenuh);
-exitFullscreenBtn.addEventListener("click", keluarLayarPenuh);
-
-// Pantau perubahan layar penuh
-document.addEventListener("fullscreenchange", updateFullscreenUI);
-document.addEventListener("webkitfullscreenchange", updateFullscreenUI);
-document.addEventListener("msfullscreenchange", updateFullscreenUI);
-
-// Event tombol menu
-document.getElementById("btnInfo").addEventListener("click", (e) => {
-    e.preventDefault();
-    bukaHalaman(linkInfo, "Info");
-});
-
-document.getElementById("btnDownload").addEventListener("click", (e) => {
-    e.preventDefault();
-    if(sudahAktif) bukaHalaman(linkDownload, "Download");
-});
-
-document.getElementById("btnCaveGame").addEventListener("click", (e) => {
-    e.preventDefault();
-    if(sudahAktif) bukaHalaman(linkCaveGame, "CaveGame SHD PC");
-});
-
-document.getElementById("btnAktif").addEventListener("click", (e) => {
-    e.preventDefault();
-    bukaHalaman(linkVerivikasi, "Verivikasi");
-});
-
-// ✅ Status aktif
-if(sudahAktif){
-    const btnD = document.getElementById("btnDownload");
-    btnD.classList.remove("kunci");
-    btnD.style.pointerEvents = "auto";
-
-    const btnC = document.getElementById("btnCaveGame");
-    btnC.classList.remove("kunci");
-    btnC.style.pointerEvents = "auto";
-
-    document.getElementById("btnAktif").style.display = "none";
-
-    const st = document.getElementById("statusBox");
-    st.className = "status on";
-    st.innerHTML = "✅ Website Sudah Aktif!";
-}
-</script>
-
+    </script>
+    
 </body>
 </html>
