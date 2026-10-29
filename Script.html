@@ -121,9 +121,38 @@ body.touch .slot svg{width:22px;height:22px}
 .acard.on{border-color:var(--key);color:var(--key);background:rgba(240,192,74,.12)}
 .acard.lock{opacity:.6;border-style:dashed}
 .lobbyc{max-height:92vh;overflow:auto;text-align:left}
-#lobby.screen{justify-content:flex-end;background:linear-gradient(to left,rgba(2,3,6,.94) 0,rgba(2,3,6,.9) 38%,rgba(2,3,6,.05) 72%)}
-@media (max-width:700px){#lobby.screen{justify-content:center;align-items:flex-end;background:linear-gradient(to top,rgba(2,3,6,.94) 0,rgba(2,3,6,.9) 50%,rgba(2,3,6,0) 75%)}.lobbyc{max-height:52vh}}
 .lobbyc h1{text-align:center}
+#lobby.screen{display:none;padding:0;background:linear-gradient(to bottom,rgba(2,3,6,.7),rgba(2,3,6,0) 22%,rgba(2,3,6,0) 62%,rgba(2,3,6,.75));overflow:hidden}
+#lobby.screen.on{display:block}
+#lobby .pos{position:absolute;display:flex;gap:10px}
+#lbTL{left:max(14px,env(safe-area-inset-left,0px));top:max(14px,env(safe-area-inset-top,0px));flex-direction:column;align-items:flex-start;width:min(46vw,340px)}
+#lbTR{right:max(14px,env(safe-area-inset-right,0px));top:max(14px,env(safe-area-inset-top,0px));flex-direction:row}
+#lbBL{left:max(14px,env(safe-area-inset-left,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));width:min(46vw,420px);flex-direction:column}
+#lbBR{right:max(14px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));flex-direction:column;align-items:flex-end}
+#lbTL #lbCodeBox{width:100%;background:#f8e86c;border:0;color:#111;padding:8px 12px}
+#lbTL #lbCodeBox .cl,#lbTL #lbCode{color:#111}
+#lbTL #lbCode{font-size:26px;letter-spacing:.3em}
+#lbTL #lbCopy{background:rgba(0,0,0,.12);border-color:#111;color:#111;padding:8px 12px;font-size:12px}
+#lbCnt2{font-size:15px;color:var(--dim)}
+#lbTog{padding:9px 14px;font-size:12px}
+#lbTR .btn,#lbBR .btn{padding:12px 18px;font-size:13px;background:#8a8a8a;border-color:#8a8a8a;color:#fff}
+#lbBR #lbStart{background:#ff4a48;border-color:#ff4a48;color:#fff}
+#lbTop{position:absolute;left:50%;top:max(14px,env(safe-area-inset-top,0px));transform:translateX(-50%);text-align:center;max-width:34vw;pointer-events:none}
+#lbSetup{position:absolute;right:max(14px,env(safe-area-inset-right,0px));top:calc(max(14px,env(safe-area-inset-top,0px)) + 62px);width:min(380px,46vw);max-height:calc(100% - 250px);overflow:auto;display:none;flex-direction:column;gap:10px;padding:12px;background:rgba(6,6,10,.82);border:1px solid var(--line)}
+#lbSetup.on{display:flex}
+#lbPl{display:none}
+#lbBL #lbChatBox{width:100%}
+#lbBL #lbChat{height:min(24vh,170px);background:#8a8a8a33}
+@media (max-width:700px){#lbTR .btn,#lbBR .btn{padding:9px 11px;font-size:11px}#lbSetup{width:min(300px,52vw)}}
+#boot{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px;text-align:center;background:radial-gradient(ellipse at 50% 45%,#1a0a0e,#030408 75%);transition:opacity .7s ease,visibility .7s}
+#boot.off{opacity:0;visibility:hidden;pointer-events:none}
+#boot .bt{font-family:var(--display);font-size:clamp(40px,9vw,84px);color:var(--blood);letter-spacing:.04em;text-shadow:0 0 28px rgba(195,22,29,.6);animation:bflick 3.2s infinite}
+#boot .bs{font-size:12px;letter-spacing:.35em;color:var(--dim)}
+#boot .bbar{width:min(320px,70vw);height:4px;background:rgba(230,223,207,.14);overflow:hidden}
+#boot .bbar i{display:block;width:40%;height:100%;background:var(--blood);box-shadow:0 0 12px var(--blood);animation:bslide 1.3s ease-in-out infinite}
+#boot .btip{max-width:min(460px,86vw);min-height:42px;font-size:13px;line-height:1.5;color:var(--ink);opacity:.85}
+@keyframes bslide{0%{transform:translateX(-110%)}100%{transform:translateX(260%)}}
+@keyframes bflick{0%,100%{opacity:1}46%{opacity:1}48%{opacity:.35}50%{opacity:1}52%{opacity:.6}54%{opacity:1}}
 #lbMsg{min-height:18px;font-size:13px;color:var(--key);text-align:center}
 #lbMsg.bad{color:#ff9a9a}
 #lbCodeBox{display:none;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border:1px solid var(--key);background:rgba(240,192,74,.06)}
@@ -212,6 +241,8 @@ h1 small{display:block;font-size:.34em;color:var(--ink);letter-spacing:.3em;text
 @media (prefers-reduced-motion:reduce){#grain{animation:none}}
 </style>
 
+<div id="boot"><div class="bs">SMA NUSANTARA</div><div class="bt">SEKOLAH HANTU</div><div class="bbar"><i></i></div><div class="btip" id="bootTip"></div><div class="bs" id="bootTxt">MEMUAT</div></div>
+<script>(function(){var t=["Senter hanya menyala kalau kamu memegangnya. Tekan angka di inventaris.","Jendela merah berarti genderuwo. Jangan masuk.","Lari menguras stamina. Simpan botol air untuk minum.","Kunci tersebar di kelas. Kumpulkan lima untuk membuka pintu tangga.","Pocong, kuntilanak, dan tuyul hanya mengagetkan, tidak mengurangi nyawa.","Gerbang bisa dibuka dengan tang, kunci gembok, atau remote dari laci.","Di Mabar, semua pemain mendapat denah kunci yang sama."];var e=document.getElementById('bootTip');if(e)e.textContent=t[Math.floor(Math.random()*t.length)];})();</script>
 <canvas id="c"></canvas>
 <div id="vig" class="fx"></div>
 <div id="grain" class="fx"></div>
@@ -262,18 +293,28 @@ h1 small{display:block;font-size:.34em;color:var(--ink);letter-spacing:.3em;text
   </div>
 </div>
 <div id="lobby" class="screen">
-  <div class="card authc lobbyc">
-    <h1><small>LOBI SOSIAL</small>MABAR</h1>
-    <div id="lbMsg"></div>
+  <div id="lbTL" class="pos">
+    <div id="lbCodeBox"><div><div class="cl" id="lbCodeLab">Kode Lobby</div><div id="lbCode">------</div></div><button class="btn ghost" id="lbCopy" type="button">Salin</button></div>
+    <div id="lbCnt2">Pemain <span id="lbCnt">0/4</span></div>
+    <button class="btn ghost" id="lbTog" type="button">Teman &amp; Ruang</button>
+  </div>
+  <div id="lbTop"><div id="lbMsg"></div></div>
+  <div id="lbTR" class="pos">
+    <button class="btn" id="lbLeave" type="button">Keluar Lobby</button>
+    <button class="btn" id="lbBack" type="button">Keluar</button>
+  </div>
+  <div id="lbSetup">
     <div id="lbSocial"><div class="cl">Teman</div><div id="lbFr"></div><div class="cl">Pemain online</div><div id="lbOnl"></div><div class="cl">Ruang tersedia · kode acak</div><div id="lbRooms"></div><div class="cl" id="lbMode"></div></div>
-    <div id="lbCodeBox"><div><div class="cl" id="lbCodeLab">Kode lobimu</div><div id="lbCode">------</div></div><button class="btn ghost" id="lbCopy" type="button">Salin</button></div>
     <button class="btn" id="lbNew" type="button">Buat lobi baru</button>
     <div class="lbjoin"><input id="lbIn" class="fld" placeholder="Kode lobi teman" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="btn ghost" id="lbGo" type="button">Gabung</button></div>
-    <div class="cl">Pemain <span id="lbCnt">0/4</span></div>
-    <div id="lbPl"></div>
-    <div id="lbChatBox"><div id="lbChat"></div><div class="lbjoin"><input id="lbMsgIn" class="fld" placeholder="Pesan" maxlength="120" autocomplete="off"><button class="btn ghost" id="lbSend" type="button">Kirim</button></div></div>
+  </div>
+  <div id="lbPl"></div>
+  <div id="lbBL" class="pos">
+    <div id="lbChatBox"><div id="lbChat"></div><div class="lbjoin"><input id="lbMsgIn" class="fld" placeholder="Bagian Chat" maxlength="120" autocomplete="off"><button class="btn ghost" id="lbSend" type="button">Kirim</button></div></div>
+  </div>
+  <div id="lbBR" class="pos">
     <div id="lbWait">Menunggu host memulai permainan…</div>
-    <div class="lbbtn"><button class="btn" id="lbStart" type="button">Mulai permainan</button><button class="btn ghost" id="lbLeave" type="button">Keluar lobi</button><button class="btn ghost" id="lbBack" type="button">Kembali</button></div>
+    <button class="btn" id="lbStart" type="button">Mulai Permainan</button>
   </div>
 </div>
 <div id="getItem"><div class="gring"></div><div class="gtxt"><small>ITEM DIDAPAT</small><b id="giName"></b><span id="giSub"></span></div></div>
@@ -2696,7 +2737,15 @@ $('bag').addEventListener('pointerdown',e=>{const b=e.target.closest('.slot');if
 $('bUse').addEventListener('pointerdown',e=>{interact();e.preventDefault();});
 
 // ---------- alur permainan ----------
+const BOOT=$('boot');let bootT=0;
+function bootShow(txt){
+  const tips=["Senter hanya menyala kalau kamu memegangnya.","Jendela merah berarti genderuwo. Jangan masuk.","Lari menguras stamina. Minum air untuk memulihkan.","Kumpulkan lima kunci di tiap lantai.","Gerbang bisa dibuka dengan tang, kunci gembok, atau remote."];
+  $('bootTip').textContent=tips[Math.floor(Math.random()*tips.length)];$('bootTxt').textContent=txt||'MEMUAT';
+  BOOT.style.transition='none';BOOT.classList.remove('off');void BOOT.offsetWidth;BOOT.style.transition='';
+}
+function bootHide(ms){clearTimeout(bootT);bootT=setTimeout(()=>BOOT.classList.add('off'),ms||0);}
 function startGame(skipIntro){
+  bootShow('MEMASUKI SEKOLAH');bootHide(900);
   AU.init();
   $('menu').classList.remove('on');$('end').classList.remove('on');
   redLights=false;
@@ -2770,6 +2819,7 @@ resetRun();
 applyQuality();
 $('load').textContent='';
 requestAnimationFrame(frame);
+(function(){const go=()=>bootHide(900);try{if(document.fonts&&document.fonts.ready){Promise.race([document.fonts.ready,new Promise(r=>setTimeout(r,2500))]).then(go);}else go();}catch(e){go();}})();
 // ---------- kustomisasi karakter ----------
 const CU={cfg:Object.assign({},CUST_DEF),tab:0,yaw:0,base:0,drag:false,lastDrag:0,cd:3.2,cy:1,tcd:3.2,tcy:1};
 const HAIRS=[['pendek','Pendek'],['poni','Poni'],['panjang','Panjang'],['kuncir','Kuncir'],['jabrik','Jabrik'],['afro','Afro'],['botak','Botak']];
@@ -3128,6 +3178,8 @@ function lobbyUI(){
   ids.forEach(id=>{const p=NET.players[id],d=document.createElement('div');d.className='lbp';d.textContent=p.name+(id===NET.me?' (kamu)':'')+((id==='H'||p.host)?' · host':'');pl.appendChild(d);});
   if(!ids.length)pl.innerHTML='<div class="lbp dim">Belum ada lobi. Buat lobi baru atau masukkan kode teman.</div>';
   $('lbCnt').textContent=ids.length+'/4';
+  const setupOn=!NET.on||LBS.tog;$('lbSetup').classList.toggle('on',setupOn);LBS.shift=setupOn;
+  $('lbLeave').style.display=NET.on?'inline-block':'none';
   $('lbStart').style.display=NET.on&&NET.role==='host'?'inline-block':'none';
   $('lbWait').style.display=NET.on&&NET.role==='client'?'block':'none';
   $('lbLeave').style.display=NET.on?'inline-block':'none';
@@ -3250,7 +3302,8 @@ function makeRemote(id,info){
   const c=makeStudent(info.cfg||{});
   c.g.visible=false;scene.add(c.g);c.g.traverse(o=>{o.frustumCulled=false;});
   const tag=nameTag(info.name||'Pemain');tag.position.set(0,2.15,0);c.g.add(tag);
-  NET.R[id]={c,tx:0,ty:8,tz:-6,yaw:0,seen:false,prev:new THREE.Vector3(),w:0};
+  c.g.traverse(o=>{o.frustumCulled=false;const m=o.material;if(m&&m.emissive&&m.emissive.getHex&&m.emissive.getHex()===0){m.emissive.setHex(0x1c1c28);m.emissiveIntensity=.8;}});
+  NET.R[id]={c,tx:0,ty:8,tz:-6,yaw:0,seen:false,prev:new THREE.Vector3(),w:0,sig:JSON.stringify(info.cfg||{})};
 }
 function dropRemote(id){const r=NET.R[id];if(!r)return;scene.remove(r.c.g);r.c.g.traverse(o=>{if(o.geometry)o.geometry.dispose();});delete NET.R[id];}
 function netRemote(d){
@@ -3262,8 +3315,27 @@ function netCloak(d){
   const idk='r'+d.id;
   spawnCloakItem(idk,d.x,d.y,d.z);
 }
+function netPoll(){
+  if(!RM.nr)return;
+  let peers;try{peers=RM.nr.peers();}catch(e){return;}
+  const me=peers.find(p=>p.isMe&&p.sameTab);if(me)NET.me=me.peer;
+  for(const pe of peers){
+    if(pe.isMe)continue;
+    const pr=pe.presence||{},id=pe.peer;
+    NET.players[id]=NET.players[id]||{id,name:String(pr.nm||'Pemain').slice(0,16),cfg:pr.cfg,host:!!pr.hst};
+    const sig=JSON.stringify(pr.cfg||{});
+    let r=NET.R[id];
+    if(!r||(pr.cfg&&r.sig!==sig)){
+      const old=r;makeRemote(id,{name:String(pr.nm||'Pemain').slice(0,16),cfg:pr.cfg});r=NET.R[id];
+      if(old){r.tx=old.tx;r.ty=old.ty;r.tz=old.tz;r.yaw=old.yaw;r.seen=old.seen;r.w=old.w;r.c.g.position.copy(old.c.g.position);}
+    }
+    if(pr.p)netRemote({id,x:pr.p[0],y:pr.p[1],z:pr.p[2],yaw:pr.p[3]});
+  }
+  for(const id of Object.keys(NET.R))if(!peers.some(p=>p.peer===id))dropRemote(id);
+}
 function netTick(dt){
   if(!NET.started)return;
+  NET.pollT=(NET.pollT||0)-dt;if(NET.pollT<=0){NET.pollT=.25;netPoll();}
   NET.sendT-=dt;
   if(NET.sendT<=0){NET.sendT=.1;netSend({t:'p',x:+P.x.toFixed(2),y:+P.y.toFixed(2),z:+P.z.toFixed(2),yaw:+P.yaw.toFixed(2)});}
   const k=Math.min(1,dt*10);
@@ -3289,6 +3361,7 @@ function openLobby(){
 }
 function closeLobby(){$('lobby').classList.remove('on');$('menu').classList.add('on');lbStageSync();}
 (function(){
+  $('lbTog').addEventListener('click',()=>{LBS.tog=!LBS.tog;lobbyUI();});
   $('bMabar').addEventListener('click',openLobby);
   $('lbBack').addEventListener('click',()=>{if(NET.on&&!NET.started)leaveLobby(true);closeLobby();});
   $('lbNew').addEventListener('click',()=>createLobby());
@@ -3446,7 +3519,7 @@ function roomLeave(){
 function dropAllRemotes(){for(const id of Object.keys(NET.R||{}))dropRemote(id);}
 
 // ---------- panggung lobi: semua pemain tampil dengan karakter dan namanya ----------
-const LBS={g:new THREE.Group(),av:[],sig:'',on:false};
+const LBS={g:new THREE.Group(),av:[],sig:'',on:false,tog:false,shift:true};
 LBS.g.visible=false;scene.add(LBS.g);
 const LB_POS={x:0,z:11};
 function lbStageOn(){return G.state==='menu'&&$('lobby').classList.contains('on');}
@@ -3476,7 +3549,7 @@ function lbStageUpdate(dt){
   const n=LBS.av.length,small=window.innerWidth<700;
   const w=Math.max(3,(n-1)*1.25+2.6);
   const d=Math.max(4.2,w*1.45);
-  const cx=LB_POS.x+(small?0:-(.18*d*.9));
+  const cx=LB_POS.x+((small||!LBS.shift)?0:-(.18*d*.9));
   camera.fov=45;camera.updateProjectionMatrix();
   camera.position.set(cx,1.55,LB_POS.z+d);camera.lookAt(cx,small?.85:1.0,LB_POS.z);camera.rotation.z=0;
   cLight.position.set(LB_POS.x+1,2.6,LB_POS.z+d*.6);cLight.intensity=1.6;
