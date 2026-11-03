@@ -4846,13 +4846,19 @@ function wpUse(){
   if(!isPrem())return;
   if(G.summonCd>0)return;G.summonCd=1.2;
   const sy=Math.sin(P.yaw),cy=Math.cos(P.yaw),x=P.x-sy*3,z=P.z-cy*3,y=groundAt(x,z,P.y);
+  bcSpawn(x,y,z,[P.x-sy*.5,P.y+1.3,P.z-cy*.5]);
+  AU.whoosh();toast('Weapon memanggil Jubah Hitam Berasap! Pemain lain juga bisa melihatnya.',false,3.5);
+  if(typeof netSend==='function')netSend({t:'cloak',x,y,z,k:'h'});
+}
+function bcSpawn(x,y,z,from){
   const g=makeCloakItem();
   g.traverse(o=>{if(o.isMesh&&o.material===cloakItemMat)o.material=bcMat;});
   g.userData.gl.material=new THREE.SpriteMaterial({map:radialTex('150,70,255',.9),blending:THREE.AdditiveBlending,transparent:true,depthWrite:false,opacity:.5});
-  g.position.set(P.x-sy*.5,P.y+1.3,P.z-cy*.5);g.rotation.y=rand(0,6.28);
-  BCS.push({g,x,y,z,t:0,id:++BCN,fly:{t:0,d:.75,x0:P.x-sy*.5,y0:P.y+1.3,z0:P.z-cy*.5}});
+  g.rotation.y=rand(0,6.28);
+  if(from){g.position.set(from[0],from[1],from[2]);}else g.position.set(x,y+1.15,z);
+  BCS.push({g,x,y,z,t:0,id:++BCN,fly:from?{t:0,d:.75,x0:from[0],y0:from[1],z0:from[2]}:null});
   while(BCS.length>12){const o=BCS.shift();scene.remove(o.g);}
-  AU.whoosh();toast('Weapon memanggil Jubah Hitam Berasap! Dekati lalu tekan E.',false,3.5);
+  if(!from){for(let i=0;i<10;i++)puff('black',x+rand(-.4,.4),y+.1+rand(0,.5),z+rand(-.4,.4),.7,rand(-.2,.2),rand(.1,.6),rand(-.2,.2),1.6,.5,true);AU.whoosh();}
 }
 function bcClaim(c){
   if(!c||!BCS.includes(c))return;
@@ -5657,6 +5663,7 @@ function renderAch(){
 }
 $('bAch').addEventListener('click',()=>{renderAch();$('menu').classList.remove('on');$('achBox').classList.add('on');});
 $('aClose').addEventListener('click',()=>{$('achBox').classList.remove('on');$('menu').classList.add('on');});
+var DBX={db:null,bans:{},staff:{},rb:false,rs:false,err:''};
 // ---------- akun: masuk, daftar, dan panel admin ----------
 const Store={
   mem:{},
@@ -5807,16 +5814,30 @@ setInterval(admRefresh,800);
   $('menu').classList.remove('on');$('auth').classList.add('on');setAuthMode('login');
 })();
 // ================= MODERASI: REKRUT ADMIN + BAN (data per perangkat) =================
-function staffList(){try{const a=JSON.parse(Store.get('sh_staff')||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+// Data bersama lintas perangkat lewat capability db (koleksi mod_bans & mod_staff). Cadangan: penyimpanan lokal.
+function dbxInit(){
+  try{
+    if(!(window.claude&&claude.use))return;
+    claude.use('db').then(db=>{
+      if(!db)return;DBX.db=db;
+      const eh=e=>{DBX.err=(e&&e.code)||'err';};
+      db.collection('mod_bans').onSnapshot(snap=>{const m={};for(const d of snap.docs)m[d.id]=d.data();DBX.bans=m;DBX.rb=true;try{banWatch();}catch(x){}},eh);
+      db.collection('mod_staff').onSnapshot(snap=>{const m={};for(const d of snap.docs)m[d.id]=d.data();DBX.staff=m;DBX.rs=true;try{staffSync();}catch(x){}},eh);
+    }).catch(()=>{});
+  }catch(e){}
+}
+function staffLocal(){try{const a=JSON.parse(Store.get('sh_staff')||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+function staffList(){const a=staffLocal();for(const k in DBX.staff)if(!a.includes(k))a.push(k);return a;}
 function staffSave(a){Store.set('sh_staff',JSON.stringify(a));}
 function isStaffName(n){n=String(n||'').toLowerCase();return n==='noxis'||staffList().includes(n);}
 function isStaff(){return !!G.user&&isStaffName(G.user);}
 function bansLoad(){try{return JSON.parse(Store.get('sh_bans')||'{}')||{};}catch(e){return {};}}
 function bansSave(b){Store.set('sh_bans',JSON.stringify(b));}
+function bansAll(){const a=Object.assign({},bansLoad());for(const k in DBX.bans)a[k]=DBX.bans[k];return a;}
 function banInfo(name){
-  const k=String(name||'').toLowerCase(),b=bansLoad(),e=b[k];
+  const k=String(name||'').toLowerCase(),e=bansAll()[k];
   if(!e)return null;
-  if(e.u&&e.u<=Date.now()){delete b[k];bansSave(b);return null;}
+  if(e.u&&e.u<=Date.now())return null;
   return e;
 }
 function banLeftTxt(e){
@@ -5833,37 +5854,55 @@ function banCheck(name){
   authErr(banMsg(e));
   return true;
 }
+function dbxFail(e){toast('Gagal menyimpan ke data bersama ('+((e&&e.code)||'error')+'). Admin perlu akses Kontributor di artifact ini.',true,5);}
 function banDo(name,minutes){
   const me=G.user||'';
   if(!isStaff())return 'Hanya admin yang bisa membanned.';
   const k=String(name||'').trim().toLowerCase();
   if(!k)return 'Tulis nama akun.';
+  if(!/^[a-z0-9_.-]{3,16}$/.test(k))return 'Nama akun tidak valid.';
   if(k==='noxis')return 'noXis (owner) tidak bisa dibanned.';
   if(k===me.toLowerCase())return 'Kamu tidak bisa membanned dirimu sendiri.';
-  const u=loadUsers()[k];if(!u)return 'Akun "'+name+'" tidak ditemukan di perangkat ini.';
+  const u=loadUsers()[k];
+  if(!u&&!DBX.db)return 'Akun "'+name+'" tidak ditemukan di perangkat ini.';
   const m=parseInt(String(minutes||'').replace(/[^0-9]/g,''),10);
   if(!(m>=1))return 'Tulis menit (angka). 99999 = permanen.';
-  const b=bansLoad();b[k]={u:m>=99999?0:Date.now()+m*60000,by:me,at:Date.now(),n:u.name};bansSave(b);
-  return 'ok:'+u.name+' dibanned '+(m>=99999?'PERMANEN':m+' menit')+'.';
+  const nm=u?u.name:String(name).trim(),e={u:m>=99999?0:Date.now()+m*60000,by:me,at:Date.now(),n:nm};
+  if(DBX.db){DBX.bans[k]=e;DBX.db.doc('mod_bans/'+k).set(e).catch(x=>{delete DBX.bans[k];const b=bansLoad();b[k]=e;bansSave(b);dbxFail(x);});}
+  else{const b=bansLoad();b[k]=e;bansSave(b);}
+  return 'ok:'+nm+' dibanned '+(m>=99999?'PERMANEN':m+' menit')+(DBX.db?' (semua perangkat).':' (hanya perangkat ini).');
 }
-function unbanDo(k){if(!isStaff())return;const b=bansLoad();delete b[String(k).toLowerCase()];bansSave(b);}
+function unbanDo(k){
+  if(!isStaff())return;k=String(k).toLowerCase();
+  const b=bansLoad();delete b[k];bansSave(b);
+  if(DBX.db&&DBX.bans[k]){delete DBX.bans[k];DBX.db.doc('mod_bans/'+k).delete().catch(dbxFail);}
+}
 function recruitDo(name){
   if(!isAdmin())return 'Hanya owner yang bisa merekrut admin.';
   const k=String(name||'').trim().toLowerCase();
   if(!k)return 'Tulis nama akun.';
+  if(!/^[a-z0-9_.-]{3,16}$/.test(k))return 'Nama akun tidak valid.';
   if(k==='noxis')return 'noXis sudah owner.';
-  const u=loadUsers()[k];if(!u)return 'Akun "'+name+'" tidak ditemukan di perangkat ini.';
-  const a=staffList();if(a.includes(k))return 'Sudah menjadi admin.';
-  a.push(k);staffSave(a);return 'ok:'+u.name+' direkrut menjadi admin.';
+  const u=loadUsers()[k];if(!u&&!DBX.db)return 'Akun "'+name+'" tidak ditemukan di perangkat ini.';
+  if(staffList().includes(k))return 'Sudah menjadi admin.';
+  const nm=u?u.name:String(name).trim();
+  if(DBX.db){DBX.staff[k]={n:nm,at:Date.now()};DBX.db.doc('mod_staff/'+k).set({n:nm,at:Date.now(),by:G.user}).catch(x=>{delete DBX.staff[k];const a=staffLocal();a.push(k);staffSave(a);dbxFail(x);});}
+  else{const a=staffLocal();a.push(k);staffSave(a);}
+  return 'ok:'+nm+' direkrut menjadi admin'+(DBX.db?' (semua perangkat).':' (hanya perangkat ini).');
 }
-function dismissDo(k){if(!isAdmin())return;staffSave(staffList().filter(x=>x!==String(k).toLowerCase()));}
+function dismissDo(k){
+  if(!isAdmin())return;k=String(k).toLowerCase();
+  staffSave(staffLocal().filter(x=>x!==k));
+  if(DBX.db&&DBX.staff[k]){delete DBX.staff[k];DBX.db.doc('mod_staff/'+k).delete().catch(dbxFail);}
+}
 function staffRender(msg){
   const b=$('staffBody');if(!b)return;
   const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   let h='';
   if(msg)h+='<div class="pbal">'+esc(msg.replace(/^ok:/,''))+'</div>';
+  h+='<div class="pbal">Data: '+(DBX.db?'bersama semua perangkat':'hanya perangkat ini (database bersama tidak tersedia)')+'</div>';
   h+='<h4>BANNED</h4><div class="rw"><input id="bnName" class="fld" placeholder="Nama akun" maxlength="16" autocomplete="off" autocapitalize="off" spellcheck="false"><input id="bnMin" class="fld" type="text" inputmode="numeric" maxlength="6" placeholder="Menit (99999 = permanen)"></div><button class="mb go" id="bnGo" type="button">Banned</button>';
-  const bans=bansLoad(),ks=Object.keys(bans).filter(k=>banInfo(k));
+  const bans=bansAll(),ks=Object.keys(bans).filter(k=>banInfo(k));
   h+='<h4>DAFTAR BAN AKTIF</h4>';
   if(!ks.length)h+='<div class="sr"><span>Tidak ada ban aktif.</span></div>';
   for(const k of ks){const e=bans[k];h+='<div class="sr"><span><b>'+esc(e.n||k)+'</b> · '+banLeftTxt(e)+'</span><button class="mb" data-unban="'+esc(k)+'" type="button">Nonaktifkan ban</button></div>';}
@@ -5871,7 +5910,7 @@ function staffRender(msg){
     h+='<h4>REKRUT ADMIN</h4><div class="rw"><input id="rcName" class="fld" placeholder="Nama akun" maxlength="16" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="mb go" id="rcGo" type="button" style="padding:8px 14px">Rekrut</button></div>';
     const st=staffList();
     if(!st.length)h+='<div class="sr"><span>Belum ada admin rekrutan.</span></div>';
-    for(const k of st){const u=loadUsers()[k];h+='<div class="sr"><span><b>'+esc((u&&u.name)||k)+'</b> · admin</span><button class="mb" data-dismiss="'+esc(k)+'" type="button">Copot</button></div>';}
+    for(const k of st){const u=loadUsers()[k];h+='<div class="sr"><span><b>'+esc((u&&u.name)||(DBX.staff[k]&&DBX.staff[k].n)||k)+'</b> · admin</span><button class="mb" data-dismiss="'+esc(k)+'" type="button">Copot</button></div>';}
   }
   b.innerHTML=h;
   for(const id of ['bnName','bnMin','rcName']){const e=$(id);if(e){e.addEventListener('keydown',ev=>ev.stopPropagation());e.addEventListener('keyup',ev=>ev.stopPropagation());}}
@@ -5897,6 +5936,7 @@ function banWatch(){
   if(x)x.addEventListener('click',()=>box.classList.remove('on'));
   try{const k=Store.get('sh_kick');if(k){Store.del('sh_kick');authErr(k);}}catch(e){}
   if(typeof setInterval==='function')setInterval(banWatch,3000);
+  dbxInit();
   staffSync();
 })();
 // ---------- mabar (main bareng) lewat PeerJS ----------
@@ -5937,7 +5977,7 @@ function lobbyUI(){
 }
 function hostBroadcast(msg,except){for(const id in NET.conns){if(id===except)continue;try{NET.conns[id].send(msg);}catch(e){}}}
 function netSend(msg){
-  if(RM.nr){if(msg.t==='p')RM.nr.presence({p:[msg.x,msg.y,msg.z,msg.yaw,Math.floor(Date.now()/1500)]}).catch(()=>{});else if(msg.t==='cloak')RM.nr.presence({cl:[msg.x,msg.y,msg.z,Date.now()]}).catch(()=>{});else if(msg.t==='rit')RM.nr.presence({rt:[msg.a,msg.m,Math.floor(Date.now()/1000)]}).catch(()=>{});return;}
+  if(RM.nr){if(msg.t==='p')RM.nr.presence({p:[msg.x,msg.y,msg.z,msg.yaw,Math.floor(Date.now()/1500)]}).catch(()=>{});else if(msg.t==='cloak')RM.nr.presence({cl:[msg.x,msg.y,msg.z,Date.now(),msg.k||0]}).catch(()=>{});else if(msg.t==='rit')RM.nr.presence({rt:[msg.a,msg.m,Math.floor(Date.now()/1000)]}).catch(()=>{});return;}
   if(!NET.on)return;
   if(NET.role==='host')hostBroadcast(Object.assign({id:NET.me||'H'},msg));
   else if(NET.hostConn&&NET.hostConn.open){try{NET.hostConn.send(msg);}catch(e){}}
@@ -6086,6 +6126,7 @@ function netRemote(d){
   if(!r.seen){r.seen=true;r.c.g.position.set(d.x,d.y,d.z);try{toast((r.name||'Pemain')+' terlihat di permainan.',false,2.2);}catch(e){}}
 }
 function netCloak(d){
+  if(d.k==='h'){bcSpawn(d.x,d.y,d.z,null);return;}
   const idk='r'+d.id;
   spawnCloakItem(idk,d.x,d.y,d.z);
 }
@@ -6108,7 +6149,7 @@ function netPoll(){
     }
     if(pr.p)netRemote({id,x:pr.p[0],y:pr.p[1],z:pr.p[2],yaw:pr.p[3]});
     if(pr.rt)netRit({id,a:pr.rt[0],m:pr.rt[1]});
-    if(pr.cl&&RM.lastCl[id]!==pr.cl[3]){RM.lastCl[id]=pr.cl[3];if(Date.now()-pr.cl[3]<4*3600*1000)netCloak({id,x:pr.cl[0],y:pr.cl[1],z:pr.cl[2]});}
+    if(pr.cl&&RM.lastCl[id]!==pr.cl[3]){RM.lastCl[id]=pr.cl[3];if(Date.now()-pr.cl[3]<4*3600*1000)netCloak({id,x:pr.cl[0],y:pr.cl[1],z:pr.cl[2],k:pr.cl[4]});}
   }
   {const live=new Set(peers.map(p=>p.peer));for(const id of Object.keys(NET.R))if(!live.has(id))dropRemote(id);}
 }
@@ -6256,7 +6297,7 @@ function roomRoster(ch){
     if(pr.hst)host=pr;
     if(pe.isMe)continue;
     if(pr.p&&(NET.started)){const k=pr.p.join();if(RM.lastP[pe.peer]!==k){RM.lastP[pe.peer]=k;netRemote({id:pe.peer,x:pr.p[0],y:pr.p[1],z:pr.p[2],yaw:pr.p[3]});}}
-    if(pr.cl&&RM.lastCl[pe.peer]!==pr.cl[3]){const first=RM.lastCl[pe.peer]===undefined;RM.lastCl[pe.peer]=pr.cl[3];if(!first||NET.started)netCloak({id:pe.peer,x:pr.cl[0],y:pr.cl[1],z:pr.cl[2]});}
+    if(pr.cl&&RM.lastCl[pe.peer]!==pr.cl[3]){const first=RM.lastCl[pe.peer]===undefined;RM.lastCl[pe.peer]=pr.cl[3];if(!first||NET.started)netCloak({id:pe.peer,x:pr.cl[0],y:pr.cl[1],z:pr.cl[2],k:pr.cl[4]});}
     if(pr.cm&&RM.lastCm[pe.peer]!==pr.cm[0]){const first=RM.lastCm[pe.peer]===undefined;RM.lastCm[pe.peer]=pr.cm[0];if(!first||pr.cm[0]===1)chatLine(String(pr.nm||'Pemain').slice(0,16),String(pr.cm[1]).slice(0,120));}
   }
   for(const pe of ch.left){dropRemote(pe.peer);delete RM.lastP[pe.peer];chatLine('sistem',String((pe.presence&&pe.presence.nm)||'Pemain').slice(0,16)+' keluar.');}
