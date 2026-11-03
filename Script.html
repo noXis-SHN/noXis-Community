@@ -34,18 +34,11 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family
 .dia{display:flex;align-items:center;gap:6px;color:#bff6ff;font-size:14px}
 #mTL .mdia{display:inline-flex;align-items:center;gap:5px;font-size:.6em;color:#bff6ff;margin-left:8px}
 #mTL .plogo{width:1em;height:1em}
-#premBox,#staffBox{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,3,6,.78);padding:16px;z-index:5}
-#premBox.on,#staffBox.on{display:flex}
-#premBox .tcard,#staffBox .tcard{width:min(520px,100%);display:flex;flex-direction:column;gap:12px;padding:16px 18px;background:rgba(8,10,16,.95);border:1px solid #b8860b;font-size:14px;color:var(--ink)}
-#premBox .th,#staffBox .th{display:flex;justify-content:space-between;align-items:center;letter-spacing:.16em;color:#ffd23a}
-#premBox .th .mb,#staffBox .th .mb{padding:8px 16px;font-size:13px}
-#staffBody{display:flex;flex-direction:column;gap:10px}
-#staffBody .sr{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:6px 8px;background:rgba(255,255,255,.05)}
-#staffBody .sr span{flex:1}
-#staffBody .sr .mb{padding:6px 10px;font-size:12px}
-#staffBody h4{margin:6px 0 0;color:#ffd23a;letter-spacing:.12em;font-size:13px}
-#staffBody .rw{display:flex;gap:8px}
-#staffBody .rw .fld{font-size:14px;padding:8px 10px}
+#premBox{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,3,6,.78);padding:16px;z-index:5}
+#premBox.on{display:flex}
+#premBox .tcard{width:min(520px,100%);display:flex;flex-direction:column;gap:12px;padding:16px 18px;background:rgba(8,10,16,.95);border:1px solid #b8860b;font-size:14px;color:var(--ink)}
+#premBox .th{display:flex;justify-content:space-between;align-items:center;letter-spacing:.16em;color:#ffd23a}
+#premBox .th .mb{padding:8px 16px;font-size:13px}
 #premBody{display:flex;flex-direction:column;gap:12px}
 #premBody .pst{display:flex;gap:12px;align-items:center}
 #premBody .plg{width:56px;height:56px;border:2px solid #fff}
@@ -475,7 +468,6 @@ h1 small{display:block;font-size:.34em;color:var(--ink);letter-spacing:.3em;text
   <div id="mBL">
     <button class="mb" id="bCust" type="button">Karakter</button>
     <button class="mb" id="bAch" type="button">Prestasi</button>
-    <button class="mb" id="bStaff" type="button" style="display:none;background:#b01820">Moderasi</button>
     <button class="mb" id="bPrem" type="button" style="background:#b8860b">Premium</button>
     <button class="mb" id="bVar" type="button" style="display:none;width:auto;align-self:flex-start">Lobi: Biasa</button>
     <div class="mr2"><button class="mb" id="bOut" type="button">Keluar Akun</button><button class="mb" id="bQual" type="button">Grafik: Tinggi</button></div>
@@ -486,7 +478,6 @@ h1 small{display:block;font-size:.34em;color:var(--ink);letter-spacing:.3em;text
   </div>
   <span id="load">Memuat dunia 3D…</span>
   <div id="premBox"><div class="tcard"><div class="th"><b>PREMIUM</b><button class="mb" id="premX" type="button">Tutup</button></div><div id="premBody"></div></div></div>
-  <div id="staffBox"><div class="tcard"><div class="th"><b>MODERASI ADMIN</b><button class="mb" id="staffX" type="button">Tutup</button></div><div id="staffBody"></div></div></div>
   <div id="tutBox">
     <div class="tcard">
       <div class="th"><b>TUTORIAL</b><button class="mb" id="tutX" type="button">Tutup</button></div>
@@ -4711,7 +4702,7 @@ function premHud(){
   try{
     const p=isPrem();
     for(const id of ['pl1','pl2']){const e=$(id);if(e){if(e.getAttribute&&e.getAttribute('src')!==PREMLOGO)e.src=PREMLOGO;e.style.display=p?'inline-block':'none';}}
-    {const e=$('ab1');if(e){if(e.getAttribute&&e.getAttribute('src')!==ADMBADGE)e.src=ADMBADGE;e.style.display=(typeof isStaff==='function'&&isStaff())?'inline-block':'none';}}
+    {const e=$('ab1');if(e){if(e.getAttribute&&e.getAttribute('src')!==ADMBADGE)e.src=ADMBADGE;e.style.display=isAdmin()?'inline-block':'none';}}
     const n=ST.dia||0;
     for(const id of ['diaN','mDia']){const e=$(id);if(e)e.textContent=String(n);}
   }catch(e){}
@@ -5525,7 +5516,7 @@ function custEff(){
     if(c[slot]!=='none'&&(!a||a.slot!==slot||!accUnlocked(a)))c[slot]=slot==='back'?'ransel':'none';
   }
   if(typeof isPrem==='function'&&isPrem())c.pm=1;
-  if(typeof isStaff==='function'&&isStaff())c.ad=1;
+  if(typeof isAdmin==='function'&&isAdmin())c.ad=1;
   return c;
 }
 const cLight=new THREE.PointLight(0xfff0dd,0,9,2);scene.add(cLight);
@@ -5663,7 +5654,6 @@ function renderAch(){
 }
 $('bAch').addEventListener('click',()=>{renderAch();$('menu').classList.remove('on');$('achBox').classList.add('on');});
 $('aClose').addEventListener('click',()=>{$('achBox').classList.remove('on');$('menu').classList.add('on');});
-var DBX={db:null,bans:{},staff:{},rb:false,rs:false,err:''};
 // ---------- akun: masuk, daftar, dan panel admin ----------
 const Store={
   mem:{},
@@ -5695,13 +5685,12 @@ function setAuthMode(m){
   $('aPass').autocomplete=m==='reg'?'new-password':'current-password';
 }
 function enterUser(name){
-  if(banCheck(name)){$('menu').classList.remove('on');$('auth').classList.add('on');return;}
   G.user=name;Store.set('sh_session',name);
   G.adm.on=isAdmin();G.adm.noclip=G.adm.fly=G.adm.god=false;G.adm.v=0;
   $('auth').classList.remove('on');$('menu').classList.add('on');
   loadCust();
   $('uName').textContent=name;$('uBadge').style.display=G.adm.on?'inline':'none';
-  admRefresh();lvSync();staffSync();
+  admRefresh();lvSync();
 }
 async function doAuth(){
   const name=$('aName').value.trim(),pw=$('aPass').value;
@@ -5812,132 +5801,6 @@ setInterval(admRefresh,800);
   const nm=Store.get('sh_session');
   if(nm){const u=loadUsers()[nm.toLowerCase()];if(u){enterUser(u.name);return;}}
   $('menu').classList.remove('on');$('auth').classList.add('on');setAuthMode('login');
-})();
-// ================= MODERASI: REKRUT ADMIN + BAN (data per perangkat) =================
-// Data bersama lintas perangkat lewat capability db (koleksi mod_bans & mod_staff). Cadangan: penyimpanan lokal.
-function dbxInit(){
-  try{
-    if(!(window.claude&&claude.use))return;
-    claude.use('db').then(db=>{
-      if(!db)return;DBX.db=db;
-      const eh=e=>{DBX.err=(e&&e.code)||'err';};
-      db.collection('mod_bans').onSnapshot(snap=>{const m={};for(const d of snap.docs)m[d.id]=d.data();DBX.bans=m;DBX.rb=true;try{banWatch();}catch(x){}},eh);
-      db.collection('mod_staff').onSnapshot(snap=>{const m={};for(const d of snap.docs)m[d.id]=d.data();DBX.staff=m;DBX.rs=true;try{staffSync();}catch(x){}},eh);
-    }).catch(()=>{});
-  }catch(e){}
-}
-function staffLocal(){try{const a=JSON.parse(Store.get('sh_staff')||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
-function staffList(){const a=staffLocal();for(const k in DBX.staff)if(!a.includes(k))a.push(k);return a;}
-function staffSave(a){Store.set('sh_staff',JSON.stringify(a));}
-function isStaffName(n){n=String(n||'').toLowerCase();return n==='noxis'||staffList().includes(n);}
-function isStaff(){return !!G.user&&isStaffName(G.user);}
-function bansLoad(){try{return JSON.parse(Store.get('sh_bans')||'{}')||{};}catch(e){return {};}}
-function bansSave(b){Store.set('sh_bans',JSON.stringify(b));}
-function bansAll(){const a=Object.assign({},bansLoad());for(const k in DBX.bans)a[k]=DBX.bans[k];return a;}
-function banInfo(name){
-  const k=String(name||'').toLowerCase(),e=bansAll()[k];
-  if(!e)return null;
-  if(e.u&&e.u<=Date.now())return null;
-  return e;
-}
-function banLeftTxt(e){
-  if(!e.u)return 'PERMANEN';
-  const m=Math.ceil((e.u-Date.now())/60000);
-  if(m>=1440)return Math.floor(m/1440)+' hari '+Math.floor((m%1440)/60)+' jam';
-  if(m>=60)return Math.floor(m/60)+' jam '+(m%60)+' menit';
-  return m+' menit';
-}
-function banMsg(e){return 'Akun ini dibanned ('+banLeftTxt(e)+').'+(e.by?' Oleh: '+e.by+'.':'');}
-function banCheck(name){
-  const e=banInfo(name);
-  if(!e)return false;
-  authErr(banMsg(e));
-  return true;
-}
-function dbxFail(e){toast('Gagal menyimpan ke data bersama ('+((e&&e.code)||'error')+'). Admin perlu akses Kontributor di artifact ini.',true,5);}
-function banDo(name,minutes){
-  const me=G.user||'';
-  if(!isStaff())return 'Hanya admin yang bisa membanned.';
-  const k=String(name||'').trim().toLowerCase();
-  if(!k)return 'Tulis nama akun.';
-  if(!/^[a-z0-9_.-]{3,16}$/.test(k))return 'Nama akun tidak valid.';
-  if(k==='noxis')return 'noXis (owner) tidak bisa dibanned.';
-  if(k===me.toLowerCase())return 'Kamu tidak bisa membanned dirimu sendiri.';
-  const u=loadUsers()[k];
-  if(!u&&!DBX.db)return 'Akun "'+name+'" tidak ditemukan di perangkat ini.';
-  const m=parseInt(String(minutes||'').replace(/[^0-9]/g,''),10);
-  if(!(m>=1))return 'Tulis menit (angka). 99999 = permanen.';
-  const nm=u?u.name:String(name).trim(),e={u:m>=99999?0:Date.now()+m*60000,by:me,at:Date.now(),n:nm};
-  if(DBX.db){DBX.bans[k]=e;DBX.db.doc('mod_bans/'+k).set(e).catch(x=>{delete DBX.bans[k];const b=bansLoad();b[k]=e;bansSave(b);dbxFail(x);});}
-  else{const b=bansLoad();b[k]=e;bansSave(b);}
-  return 'ok:'+nm+' dibanned '+(m>=99999?'PERMANEN':m+' menit')+(DBX.db?' (semua perangkat).':' (hanya perangkat ini).');
-}
-function unbanDo(k){
-  if(!isStaff())return;k=String(k).toLowerCase();
-  const b=bansLoad();delete b[k];bansSave(b);
-  if(DBX.db&&DBX.bans[k]){delete DBX.bans[k];DBX.db.doc('mod_bans/'+k).delete().catch(dbxFail);}
-}
-function recruitDo(name){
-  if(!isAdmin())return 'Hanya owner yang bisa merekrut admin.';
-  const k=String(name||'').trim().toLowerCase();
-  if(!k)return 'Tulis nama akun.';
-  if(!/^[a-z0-9_.-]{3,16}$/.test(k))return 'Nama akun tidak valid.';
-  if(k==='noxis')return 'noXis sudah owner.';
-  const u=loadUsers()[k];if(!u&&!DBX.db)return 'Akun "'+name+'" tidak ditemukan di perangkat ini.';
-  if(staffList().includes(k))return 'Sudah menjadi admin.';
-  const nm=u?u.name:String(name).trim();
-  if(DBX.db){DBX.staff[k]={n:nm,at:Date.now()};DBX.db.doc('mod_staff/'+k).set({n:nm,at:Date.now(),by:G.user}).catch(x=>{delete DBX.staff[k];const a=staffLocal();a.push(k);staffSave(a);dbxFail(x);});}
-  else{const a=staffLocal();a.push(k);staffSave(a);}
-  return 'ok:'+nm+' direkrut menjadi admin'+(DBX.db?' (semua perangkat).':' (hanya perangkat ini).');
-}
-function dismissDo(k){
-  if(!isAdmin())return;k=String(k).toLowerCase();
-  staffSave(staffLocal().filter(x=>x!==k));
-  if(DBX.db&&DBX.staff[k]){delete DBX.staff[k];DBX.db.doc('mod_staff/'+k).delete().catch(dbxFail);}
-}
-function staffRender(msg){
-  const b=$('staffBody');if(!b)return;
-  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  let h='';
-  if(msg)h+='<div class="pbal">'+esc(msg.replace(/^ok:/,''))+'</div>';
-  h+='<div class="pbal">Data: '+(DBX.db?'bersama semua perangkat':'hanya perangkat ini (database bersama tidak tersedia)')+'</div>';
-  h+='<h4>BANNED</h4><div class="rw"><input id="bnName" class="fld" placeholder="Nama akun" maxlength="16" autocomplete="off" autocapitalize="off" spellcheck="false"><input id="bnMin" class="fld" type="text" inputmode="numeric" maxlength="6" placeholder="Menit (99999 = permanen)"></div><button class="mb go" id="bnGo" type="button">Banned</button>';
-  const bans=bansAll(),ks=Object.keys(bans).filter(k=>banInfo(k));
-  h+='<h4>DAFTAR BAN AKTIF</h4>';
-  if(!ks.length)h+='<div class="sr"><span>Tidak ada ban aktif.</span></div>';
-  for(const k of ks){const e=bans[k];h+='<div class="sr"><span><b>'+esc(e.n||k)+'</b> · '+banLeftTxt(e)+'</span><button class="mb" data-unban="'+esc(k)+'" type="button">Nonaktifkan ban</button></div>';}
-  if(isAdmin()){
-    h+='<h4>REKRUT ADMIN</h4><div class="rw"><input id="rcName" class="fld" placeholder="Nama akun" maxlength="16" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="mb go" id="rcGo" type="button" style="padding:8px 14px">Rekrut</button></div>';
-    const st=staffList();
-    if(!st.length)h+='<div class="sr"><span>Belum ada admin rekrutan.</span></div>';
-    for(const k of st){const u=loadUsers()[k];h+='<div class="sr"><span><b>'+esc((u&&u.name)||(DBX.staff[k]&&DBX.staff[k].n)||k)+'</b> · admin</span><button class="mb" data-dismiss="'+esc(k)+'" type="button">Copot</button></div>';}
-  }
-  b.innerHTML=h;
-  for(const id of ['bnName','bnMin','rcName']){const e=$(id);if(e){e.addEventListener('keydown',ev=>ev.stopPropagation());e.addEventListener('keyup',ev=>ev.stopPropagation());}}
-  const g=$('bnGo');if(g)g.addEventListener('click',()=>staffRender(banDo($('bnName').value,$('bnMin').value)));
-  const r=$('rcGo');if(r)r.addEventListener('click',()=>staffRender(recruitDo($('rcName').value)));
-  b.querySelectorAll('[data-unban]').forEach(x=>x.addEventListener('click',()=>{unbanDo(x.getAttribute('data-unban'));staffRender('Ban dinonaktifkan.');}));
-  b.querySelectorAll('[data-dismiss]').forEach(x=>x.addEventListener('click',()=>{dismissDo(x.getAttribute('data-dismiss'));staffRender('Admin dicopot.');}));
-}
-function staffSync(){
-  const b=$('bStaff');if(b)b.style.display=isStaff()?'block':'none';
-  try{if(typeof premHud==='function')premHud();}catch(e){}
-}
-function banWatch(){
-  if(!G.user)return;
-  const e=banInfo(G.user);
-  if(!e)return;
-  Store.set('sh_kick',banMsg(e));Store.del('sh_session');
-  try{location.reload();}catch(x){}
-}
-(function(){
-  const o=$('bStaff'),x=$('staffX'),box=$('staffBox');
-  if(o)o.addEventListener('click',()=>{staffRender('');box.classList.add('on');});
-  if(x)x.addEventListener('click',()=>box.classList.remove('on'));
-  try{const k=Store.get('sh_kick');if(k){Store.del('sh_kick');authErr(k);}}catch(e){}
-  if(typeof setInterval==='function')setInterval(banWatch,3000);
-  dbxInit();
-  staffSync();
 })();
 // ---------- mabar (main bareng) lewat PeerJS ----------
 const NET={on:false,role:null,peer:null,hostConn:null,conns:{},me:null,players:{},code:'',started:false,R:{},sendT:0,idx:0,count:1,joinTimer:0};
