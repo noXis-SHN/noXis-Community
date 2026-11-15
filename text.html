@@ -1,0 +1,317 @@
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local Random = Random.new()
+
+-- Fungsi bikin part
+local function buatPart(nama, ukuran, posisi, material, warna, yAngin)
+	local part = Instance.new("Part")
+	part.Name = nama
+	part.Size = ukuran
+	part.Position = posisi
+	part.Material = material
+	part.Color = warna
+	part.Anchored = true
+	part.CanCollide = true
+	if yAngin then
+		part.CFrame = CFrame.new(posisi) * CFrame.Angles(0, yAngin, 0)
+	end
+	part.Parent = Workspace
+	return part
+end
+
+-- Fungsi bikin pohon biasa
+local function buatPohon(pos, tinggi, warnaDaun)
+	local batang = buatPart("Batang", Vector3.new(1.2, tinggi * 0.6, 1.2), pos + Vector3.new(0, tinggi * 0.3, 0), Enum.Material.Wood, Color3.fromRGB(90, 60, 30))
+	local daun1 = buatPart("Daun", Vector3.new(5, 4, 5), pos + Vector3.new(0, tinggi * 0.85, 0), Enum.Material.LeafyGrass, warnaDaun)
+	local daun2 = buatPart("Daun", Vector3.new(4, 3, 4), pos + Vector3.new(0, tinggi + 1, 0), Enum.Material.LeafyGrass, warnaDaun)
+end
+
+-- Fungsi bikin pulau melayang
+local function buatPulau(nama, posPusat, ukuran, warnaTanah, warnaRumput, tinggiPulau)
+	for lapis = 1, 5 do
+		local lebarLapis = ukuran - (lapis * 4)
+		if lebarLapis < 8 then break end
+		buatPart("BawahPulau", Vector3.new(lebarLapis, 4, lebarLapis), 
+			posPusat + Vector3.new(0, tinggiPulau - (lapis * 3), 0), 
+			Enum.Material.Slate, Color3.fromRGB(80, 85, 90))
+	end
+	buatPart("Tanah", Vector3.new(ukuran, 2.5, ukuran), posPusat + Vector3.new(0, tinggiPulau, 0), 
+		Enum.Material.Ground, warnaTanah)
+	buatPart("Rumput", Vector3.new(ukuran - 1, 1, ukuran - 1), posPusat + Vector3.new(0, tinggiPulau + 1.75, 0), 
+		Enum.Material.Grass, warnaRumput)
+	return posPusat + Vector3.new(0, tinggiPulau + 2.5, 0)
+end
+
+-- ==========================================
+-- STRUKTUR KHUSUS SETIAP BIOMA
+-- ==========================================
+
+-- 🏜️ PIRAMID DI GURUN
+local function buatPiramid(pusat)
+	print("🏜️ Membuat Piramid...")
+	local ukuranDasar = 30
+	local tingkat = 8
+	for i = 1, tingkat do
+		local lebar = ukuranDasar - ((i - 1) * 3.5)
+		local tinggi = 3.5
+		buatPart("Piramid", Vector3.new(lebar, tinggi, lebar), 
+			pusat + Vector3.new(0, (i - 1) * tinggi, 0), 
+			Enum.Material.Sandstone, Color3.fromRGB(200, 170, 110))
+	end
+end
+
+-- ❄️ SNOWMAN DI SALJU
+local function buatSnowman(pusat)
+	print("❄️ Membuat Snowman...")
+	-- Badan bawah
+	local bawah = Instance.new("Part")
+	bawah.Name = "BadanSnowman"
+	bawah.Shape = Enum.PartType.Ball
+	bawah.Size = Vector3.new(8, 8, 8)
+	bawah.Position = pusat + Vector3.new(0, 4, 0)
+	bawah.Material = Enum.Material.Ice
+	bawah.Color = Color3.fromRGB(230, 245, 255)
+	bawah.Anchored = true
+	bawah.Parent = Workspace
+	-- Badan tengah
+	local tengah = Instance.new("Part")
+	tengah.Name = "TengahSnowman"
+	tengah.Shape = Enum.PartType.Ball
+	tengah.Size = Vector3.new(5.5, 5.5, 5.5)
+	tengah.Position = pusat + Vector3.new(0, 10.75, 0)
+	tengah.Material = Enum.Material.Ice
+	tengah.Color = Color3.fromRGB(230, 245, 255)
+	tengah.Anchored = true
+	tengah.Parent = Workspace
+	-- Kepala
+	local kepala = Instance.new("Part")
+	kepala.Name = "KepalaSnowman"
+	kepala.Shape = Enum.PartType.Ball
+	kepala.Size = Vector3.new(4, 4, 4)
+	kepala.Position = pusat + Vector3.new(0, 16.5, 0)
+	kepala.Material = Enum.Material.Ice
+	kepala.Color = Color3.fromRGB(230, 245, 255)
+	kepala.Anchored = true
+	kepala.Parent = Workspace
+	-- Mata — BlackPlastic → Plastic + warna hitam
+	buatPart("MataSnowman", Vector3.new(0.8, 0.8, 0.4), pusat + Vector3.new(-1, 16.5, 2), Enum.Material.Plastic, Color3.fromRGB(0, 0, 0))
+	buatPart("MataSnowman", Vector3.new(0.8, 0.8, 0.4), pusat + Vector3.new(1, 16.5, 2), Enum.Material.Plastic, Color3.fromRGB(0, 0, 0))
+	-- Hidung wortel
+	buatPart("HidungSnowman", Vector3.new(0.6, 0.6, 1.8), pusat + Vector3.new(0, 15.8, 4), Enum.Material.Plastic, Color3.fromRGB(255, 140, 45))
+	-- Topi
+	buatPart("TopiBawah", Vector3.new(3.5, 0.5, 3.5), pusat + Vector3.new(0, 19, 0), Enum.Material.Plastic, Color3.fromRGB(30, 30, 30))
+	buatPart("TopiAtas", Vector3.new(2.2, 1.8, 2.2), pusat + Vector3.new(0, 20.15, 0), Enum.Material.Plastic, Color3.fromRGB(30, 30, 30))
+end
+
+-- 🌳 BATU TULISAN "ARTEFAK" DI JUNGLE
+local function buatBatuArtefak(pusat)
+	print("🌳 Membuat Batu Artefak...")
+	-- Batu panjang
+	buatPart("BatuArtefak", Vector3.new(18, 3, 5), pusat + Vector3.new(0, 1.5, 0), 
+		Enum.Material.Concrete, Color3.fromRGB(110, 105, 95))
+	-- Tulisan ARTEFAK dari blok batu
+	local warnaHuruf = Color3.fromRGB(70, 65, 55)
+	local mtr = Enum.Material.Concrete
+	-- A
+	buatPart("A", Vector3.new(1.2, 2, 0.5), pusat + Vector3.new(-7, 2.5, 2.6), mtr, warnaHuruf)
+	buatPart("A", Vector3.new(1.2, 2, 0.5), pusat + Vector3.new(-5.8, 2.5, 2.6), mtr, warnaHuruf)
+	buatPart("A", Vector3.new(1.4, 0.6, 0.5), pusat + Vector3.new(-6.4, 3.2, 2.6), mtr, warnaHuruf)
+	-- R
+	buatPart("R", Vector3.new(1, 2, 0.5), pusat + Vector3.new(-4.5, 2.5, 2.6), mtr, warnaHuruf)
+	buatPart("R", Vector3.new(1, 0.6, 0.5), pusat + Vector3.new(-3.5, 2.5, 2.6), mtr, warnaHuruf)
+	buatPart("R", Vector3.new(0.8, 0.8, 0.5), pusat + Vector3.new(-3.5, 3.3, 2.6), mtr, warnaHuruf)
+	-- T
+	buatPart("T", Vector3.new(2, 0.6, 0.5), pusat + Vector3.new(-2.5, 3.5, 2.6), mtr, warnaHuruf)
+	buatPart("T", Vector3.new(0.6, 2, 0.5), pusat + Vector3.new(-2.5, 2.5, 2.6), mtr, warnaHuruf)
+	-- E
+	buatPart("E", Vector3.new(0.6, 2, 0.5), pusat + Vector3.new(-1, 2.5, 2.6), mtr, warnaHuruf)
+	buatPart("E", Vector3.new(1.2, 0.5, 0.5), pusat + Vector3.new(-0.4, 2.5, 2.6), mtr, warnaHuruf)
+	buatPart("E", Vector3.new(1.2, 0.5, 0.5), pusat + Vector3.new(-0.4, 3.5, 2.6), mtr, warnaHuruf)
+	buatPart("E", Vector3.new(1.2, 0.5, 0.5), pusat + Vector3.new(-0.4, 3.0, 2.6), mtr, warnaHuruf)
+	-- F
+	buatPart("F", Vector3.new(0.6, 2, 0.5), pusat + Vector3.new(0.5, 2.5, 2.6), mtr, warnaHuruf)
+	buatPart("F", Vector3.new(1.2, 0.5, 0.5), pusat + Vector3.new(1.1, 3.5, 2.6), mtr, warnaHuruf)
+	buatPart("F", Vector3.new(1.2, 0.5, 0.5), pusat + Vector3.new(1.1, 3.0, 2.6), mtr, warnaHuruf)
+	-- A
+	buatPart("A2", Vector3.new(1.2, 2, 0.5), pusat + Vector3.new(2.2, 2.5, 2.6), mtr, warnaHuruf)
+	buatPart("A2", Vector3.new(1.2, 2, 0.5), pusat + Vector3.new(3.4, 2.5, 2.6), mtr, warnaHuruf)
+	buatPart("A2", Vector3.new(1.4, 0.6, 0.5), pusat + Vector3.new(2.8, 3.2, 2.6), mtr, warnaHuruf)
+	-- K
+	buatPart("K", Vector3.new(0.6, 2, 0.5), pusat + Vector3.new(4.5, 2.5, 2.6), mtr, warnaHuruf)
+	buatPart("K", Vector3.new(1.2, 0.5, 0.5), pusat + Vector3.new(5.1, 3.5, 2.6), mtr, warnaHuruf)
+	buatPart("K", Vector3.new(1.2, 0.5, 0.5), pusat + Vector3.new(5.1, 2.5, 2.6), mtr, warnaHuruf)
+end
+
+-- 🌴 TEMPAT BERSAHAJA DI TROPIS
+local function buatTempatBersantai(pusat)
+	print("🌴 Membuat Tempat Bersantai...")
+	buatPart("LantaiPanggung", Vector3.new(20, 1, 16), pusat + Vector3.new(0, 0.5, 0), 
+		Enum.Material.WoodPlanks, Color3.fromRGB(160, 110, 60))
+	local posTiang = {
+		Vector3.new(-8, -2.5, -7),
+		Vector3.new(8, -2.5, -7),
+		Vector3.new(-8, -2.5, 7),
+		Vector3.new(8, -2.5, 7),
+	}
+	for _, p in ipairs(posTiang) do
+		buatPart("Tiang", Vector3.new(1, 6, 1), pusat + p, 
+			Enum.Material.Wood, Color3.fromRGB(120, 80, 45))
+	end
+	buatPart("Atap", Vector3.new(22, 1.5, 18), pusat + Vector3.new(0, 4, 0), 
+		Enum.Material.LeafyGrass, Color3.fromRGB(190, 160, 90))
+	buatPart("Kursi", Vector3.new(4, 1, 5), pusat + Vector3.new(-6, 1, -3), 
+		Enum.Material.Plastic, Color3.fromRGB(220, 180, 120))
+	buatPart("SandaranKursi", Vector3.new(4, 3, 0.5), pusat + Vector3.new(-6, 3, -5.5), 
+		Enum.Material.Plastic, Color3.fromRGB(220, 180, 120))
+	buatPart("Kursi", Vector3.new(4, 1, 5), pusat + Vector3.new(6, 1, -3), 
+		Enum.Material.Plastic, Color3.fromRGB(220, 180, 120))
+	buatPart("SandaranKursi", Vector3.new(4, 3, 0.5), pusat + Vector3.new(6, 3, -5.5), 
+		Enum.Material.Plastic, Color3.fromRGB(220, 180, 120))
+	buatPart("Meja", Vector3.new(5, 1, 8), pusat + Vector3.new(0, 1.5, 3), 
+		Enum.Material.Wood, Color3.fromRGB(140, 90, 50))
+end
+
+-- ==========================================
+-- 4 BIOMA
+-- ==========================================
+print("🌍 Membuat 4 Pulau Melayang...")
+local posPulau = {}
+
+-- === 🌴 BIOMA TROPIS ===
+posPulau.Tropis = buatPulau("Tropis", Vector3.new(-140, 100, -120), 90, 
+	Color3.fromRGB(139, 90, 43), Color3.fromRGB(80, 180, 60), 0)
+for i = 1, 5 do
+	local x = Random:NextNumber() * 60 - 30
+	local z = Random:NextNumber() * 60 - 30
+	local pos = posPulau.Tropis + Vector3.new(x, 0, z)
+	local batang = buatPart("BatangKelapa", Vector3.new(1, 14, 1), pos + Vector3.new(0, 7, 0), Enum.Material.Wood, Color3.fromRGB(150, 110, 60))
+	for d = 0, 5 do
+		local sudut = math.rad(d * 60)
+		local daunPos = pos + Vector3.new(math.cos(sudut) * 3, 14, math.sin(sudut) * 3)
+		local daun = Instance.new("Part")
+		daun.Name = "DaunKelapa"
+		daun.Shape = Enum.PartType.Wedge
+		daun.Size = Vector3.new(6, 1, 2)
+		daun.CFrame = CFrame.new(daunPos) * CFrame.Angles(0, sudut, math.rad(25))
+		daun.Material = Enum.Material.LeafyGrass
+		daun.Color = Color3.fromRGB(30, 140, 50)
+		daun.Anchored = true
+		daun.Parent = Workspace
+	end
+end
+buatPart("Kolam", Vector3.new(20, 0.8, 20), posPulau.Tropis + Vector3.new(0, 0.4, 0), Enum.Material.Water, Color3.fromRGB(50, 160, 220)).Transparency = 0.3
+buatTempatBersantai(posPulau.Tropis + Vector3.new(28, 0, 28))
+print("✅ Bioma Tropis selesai")
+
+-- === 🌳 BIOMA JUNGLE ===
+posPulau.Jungle = buatPulau("Jungle", Vector3.new(140, 100, -120), 100, 
+	Color3.fromRGB(100, 65, 30), Color3.fromRGB(35, 110, 35), 0)
+for i = 1, 12 do
+	local x = Random:NextNumber() * 70 - 35
+	local z = Random:NextNumber() * 70 - 35
+	local tinggi = Random:NextInteger(10, 18)
+	buatPohon(posPulau.Jungle + Vector3.new(x, 0, z), tinggi, Color3.fromRGB(25, 90, 25))
+end
+for i = 1, 20 do
+	local x = Random:NextNumber() * 80 - 40
+	local z = Random:NextNumber() * 80 - 40
+	buatPart("Semak", Vector3.new(Random:NextInteger(2, 4), 1, Random:NextInteger(2, 4)), 
+		posPulau.Jungle + Vector3.new(x, 0.5, z), Enum.Material.LeafyGrass, Color3.fromRGB(45, 130, 45))
+end
+buatBatuArtefak(posPulau.Jungle + Vector3.new(-35, 0, -30))
+print("✅ Bioma Jungle selesai")
+
+-- === ❄️ BIOMA SALJU ===
+posPulau.Salju = buatPulau("Salju", Vector3.new(-140, 100, 120), 85, 
+	Color3.fromRGB(180, 180, 180), Color3.fromRGB(250, 252, 255), 0)
+for i = 1, 7 do
+	local x = Random:NextNumber() * 60 - 30
+	local z = Random:NextNumber() * 60 - 30
+	local pos = posPulau.Salju + Vector3.new(x, 0, z)
+	buatPart("BatangCemara", Vector3.new(1, 10, 1), pos + Vector3.new(0, 5, 0), Enum.Material.Wood, Color3.fromRGB(70, 50, 30))
+	for lapis = 1, 4 do
+		local lebar = 6 - lapis
+		buatPart("DaunCemara", Vector3.new(lebar, 2, lebar), pos + Vector3.new(0, lapis * 2.2 + 0.5, 0), Enum.Material.Ice, Color3.fromRGB(210, 230, 255))
+	end
+end
+for i = 1, 10 do
+	local x = Random:NextNumber() * 70 - 35
+	local z = Random:NextNumber() * 70 - 35
+	local uk = Random:NextInteger(2, 5)
+	buatPart("BongkahEs", Vector3.new(uk, uk * 0.7, uk), posPulau.Salju + Vector3.new(x, uk * 0.35, z), Enum.Material.Ice, Color3.fromRGB(190, 220, 255)).Transparency = 0.25
+end
+buatSnowman(posPulau.Salju + Vector3.new(30, 0, -28))
+print("✅ Bioma Salju selesai")
+
+-- === 🏜️ BIOMA GURUN ===
+posPulau.Gurun = buatPulau("Gurun", Vector3.new(140, 100, 120), 90, 
+	Color3.fromRGB(180, 150, 90), Color3.fromRGB(230, 200, 130), 0)
+for i = 1, 6 do
+	local x = Random:NextNumber() * 70 - 35
+	local z = Random:NextNumber() * 70 - 35
+	local uk = Random:NextInteger(6, 12)
+	buatPart("BukitPasir", Vector3.new(uk, uk * 0.6, uk), posPulau.Gurun + Vector3.new(x, uk * 0.3, z), Enum.Material.Sand, Color3.fromRGB(240, 210, 140))
+end
+for i = 1, 8 do
+	local x = Random:NextNumber() * 75 - 37
+	local z = Random:NextNumber() * 75 - 37
+	local uk = Random:NextInteger(2, 5)
+	buatPart("BatuGurun", Vector3.new(uk, uk * 0.8, uk), posPulau.Gurun + Vector3.new(x, uk * 0.4, z), Enum.Material.Slate, Color3.fromRGB(160, 140, 110))
+end
+for i = 1, 5 do
+	local x = Random:NextNumber() * 70 - 35
+	local z = Random:NextNumber() * 70 - 35
+	local tinggi = Random:NextInteger(4, 7)
+	local pos = posPulau.Gurun + Vector3.new(x, 0, z)
+	buatPart("BatangKaktus", Vector3.new(1.2, tinggi, 1.2), pos + Vector3.new(0, tinggi/2, 0), Enum.Material.Plastic, Color3.fromRGB(40, 120, 50))
+	if Random:NextNumber() > 0.4 then
+		buatPart("LenganKaktus", Vector3.new(0.8, 1.5, 0.8), pos + Vector3.new(1.2, tinggi * 0.6, 0), Enum.Material.Plastic, Color3.fromRGB(40, 120, 50))
+	end
+end
+buatPiramid(posPulau.Gurun + Vector3.new(-32, 0, 30))
+print("✅ Bioma Gurun selesai")
+
+-- ==========================================
+-- JEMBATAN
+-- ==========================================
+local function buatJembatan(dariPos, kePos)
+	local jarakX = kePos.X - dariPos.X
+	local jarakZ = kePos.Z - dariPos.Z
+	local jarakTotal = math.sqrt(jarakX^2 + jarakZ^2)
+	local tengah = (dariPos + kePos) / 2
+	buatPart("Jembatan", Vector3.new(jarakTotal - 10, 1.2, 6), tengah + Vector3.new(0, -1, 0), 
+		Enum.Material.Wood, Color3.fromRGB(110, 75, 40), math.atan2(jarakZ, jarakX))
+end
+buatJembatan(posPulau.Tropis, posPulau.Jungle)
+buatJembatan(posPulau.Salju, posPulau.Gurun)
+buatJembatan(posPulau.Tropis, posPulau.Salju)
+buatJembatan(posPulau.Jungle, posPulau.Gurun)
+print("✅ Jembatan selesai dibuat")
+
+-- ==========================================
+-- TITIK SPAWN & SPAWN ACAK
+-- ==========================================
+local daftarSpawn = {
+	buatPart("SpawnTropis", Vector3.new(6, 1, 6), posPulau.Tropis + Vector3.new(0, 0.5, 0), Enum.Material.Neon, Color3.fromRGB(80, 255, 120)),
+	buatPart("SpawnJungle", Vector3.new(6, 1, 6), posPulau.Jungle + Vector3.new(0, 0.5, 0), Enum.Material.Neon, Color3.fromRGB(40, 180, 60)),
+	buatPart("SpawnSalju", Vector3.new(6, 1, 6), posPulau.Salju + Vector3.new(0, 0.5, 0), Enum.Material.Neon, Color3.fromRGB(180, 220, 255)),
+	buatPart("SpawnGurun", Vector3.new(6, 1, 6), posPulau.Gurun + Vector3.new(0, 0.5, 0), Enum.Material.Neon, Color3.fromRGB(255, 200, 80)),
+}
+for _, spawnPart in ipairs(daftarSpawn) do
+	spawnPart.Transparency = 0.3
+	spawnPart.CanCollide = false
+end
+
+Players.PlayerAdded:Connect(function(pemain)
+	pemain.CharacterAdded:Connect(function(karakter)
+		task.wait(0.1)
+		local terpilih = daftarSpawn[Random:NextInteger(1, #daftarSpawn)]
+		local hrp = karakter:FindFirstChild("HumanoidRootPart")
+		if hrp then
+			hrp.CFrame = CFrame.new(terpilih.Position + Vector3.new(0, 3, 0))
+			print(pemain.Name .. " muncul di: " .. terpilih.Name)
+		end
+	end)
+end)
+
+print("🎉 Semua selesai! Error BlackPlastic sudah diperbaiki!")
