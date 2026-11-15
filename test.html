@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lihat Tulisan</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: linear-gradient(135deg, #0f172a, #1e293b); min-height: 100vh; padding: 40px 20px; color: #fff; }
+        .container { max-width: 650px; margin: 0 auto; }
+        .tulisan-card { background: rgba(30, 41, 59, 0.8); padding: 35px; border-radius: 14px; border: 1px solid #38bdf8; }
+        h1 { color: #7dd3fc; margin-bottom: 10px; line-height: 1.3; }
+        .tanggal { font-size: 14px; color: #94a3b8; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #334155; }
+        .isi { font-size: 17px; line-height: 1.8; color: #e2e8f0; white-space: pre-wrap; }
+        .kembali { display: inline-block; margin-top: 30px; color: #38bdf8; text-decoration: none; }
+        .kembali:hover { text-decoration: underline; }
+        .tidak-ditemukan { text-align: center; padding: 60px 20px; color: #94a3b8; }
+        .tidak-ditemukan h2 { color: #f87171; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container" id="konten"></div>
+
+<script>
+function ambilSemuaTulisan() {
+    let data = localStorage.getItem('daftarTulisan')
+    return data ? JSON.parse(data) : []
+}
+
+function escapeHtml(teks) {
+    const div = document.createElement('div')
+    div.textContent = teks
+    return div.innerHTML
+}
+
+function tampilkanTulisan() {
+    const params = new URLSearchParams(window.location.search)
+    const id = params.get('id')
+    const wadah = document.getElementById('konten')
+    
+    if (!id) {
+        wadah.innerHTML = `
+            <div class="tidak-ditemukan">
+                <h2>❌ Tidak ada tulisan</h2>
+                <p>Link tidak lengkap atau tulisan tidak ditemukan.</p>
+                <a href="index.html" class="kembali">← Kembali ke halaman utama</a>
+            </div>
+        `
+        return
+    }
+
+    const daftar = ambilSemuaTulisan()
+    const tulisan = daftar.find(item => item.id == id)
+
+    if (!tulisan) {
+        wadah.innerHTML = `
+            <div class="tidak-ditemukan">
+                <h2>❌ Tulisan Tidak Ditemukan</h2>
+                <p>Tulisan mungkin sudah dihapus atau link tidak valid.</p>
+                <a href="index.html" class="kembali">← Kembali ke halaman utama</a>
+            </div>
+        `
+        return
+    }
+
+    wadah.innerHTML = `
+        <div class="tulisan-card">
+            <h1>${escapeHtml(tulisan.judul)}</h1>
+            <div class="tanggal">📅 ${tulisan.tanggal}</div>
+            <div class="isi">${escapeHtml(tulisan.isi)}</div>
+        </div>
+        <a href="index.html" class="kembali">← Kembali buat tulisan baru</a>
+    `
+}
+
+tampilkanTulisan()
+</script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buat Tulisan</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: linear-gradient(135deg, #0f172a, #1e293b); min-height: 100vh; padding: 20px; color: #fff; }
+        .container { max-width: 700px; margin: 0 auto; }
+        h1 { text-align: center; color: #38bdf8; margin-bottom: 30px; }
+        .card { background: rgba(30, 41, 59, 0.8); padding: 25px; border-radius: 12px; border: 1px solid #38bdf8; margin-bottom: 25px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #bae6fd; }
+        input, textarea { width: 100%; padding: 12px; margin-bottom: 18px; border-radius: 8px; background: #0f172a; color: #fff; border: 1px solid #475569; font-size: 16px; }
+        input:focus, textarea:focus { outline: none; border-color: #38bdf8; }
+        button { background: #0284c7; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 15px; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #0369a1; }
+        .tulisan-item { background: rgba(30, 41, 59, 0.5); padding: 18px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #38bdf8; }
+        .tulisan-item h3 { color: #7dd3fc; margin-bottom: 6px; }
+        .tanggal { font-size: 12px; color: #94a3b8; margin-bottom: 10px; }
+        .btn-group { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        .share-btn { background: #10b981; }
+        .share-btn:hover { background: #059669; }
+        .hapus-btn { background: #dc2626; }
+        .hapus-btn:hover { background: #b91c1c; }
+        .link-box { margin-top: 12px; padding: 10px; background: #0f172a; border-radius: 6px; border: 1px dashed #38bdf8; display: none; word-break: break-all; font-size: 13px; color: #93c5fd; }
+        .kosong { text-align: center; color: #94a3b8; padding: 30px; }
+        .copy-msg { color: #10b981; font-size: 13px; margin-top: 6px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Buat Tulisan</h1>
+
+        <div class="card">
+            <label for="judul">Judul</label>
+            <input type="text" id="judul" placeholder="Masukkan judul..." required>
+
+            <label for="isi">Isi Tulisan</label>
+            <textarea id="isi" rows="8" placeholder="Tulis sesuatu..." required></textarea>
+
+            <button onclick="simpanTulisan()">💾 Simpan Tulisan</button>
+        </div>
+
+        <h2 style="color:#38bdf8; margin-bottom:15px;">📂 Tulisan Saya</h2>
+        <div id="daftarTulisan"></div>
+    </div>
+
+<script>
+function ambilTulisan() {
+    let data = localStorage.getItem('daftarTulisan')
+    return data ? JSON.parse(data) : []
+}
+
+function simpanTulisan() {
+    const judul = document.getElementById('judul').value.trim()
+    const isi = document.getElementById('isi').value.trim()
+    if (!judul || !isi) { alert('Lengkapi judul dan isi!'); return }
+
+    const daftar = ambilTulisan()
+    const sekarang = new Date()
+    const tanggal = sekarang.toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit'})
+    
+    daftar.push({ id: Date.now(), judul: judul, isi: isi, tanggal: tanggal })
+    localStorage.setItem('daftarTulisan', JSON.stringify(daftar))
+    
+    document.getElementById('judul').value = ''
+    document.getElementById('isi').value = ''
+    tampilkan()
+}
+
+function hapusTulisan(id) {
+    if (confirm('Hapus tulisan ini?')) {
+        let daftar = ambilTulisan()
+        daftar = daftar.filter(item => item.id !== id)
+        localStorage.setItem('daftarTulisan', JSON.stringify(daftar))
+        tampilkan()
+    }
+}
+
+function bagikan(id) {
+    const daftar = ambilTulisan()
+    const tulisan = daftar.find(item => item.id === id)
+    if (!tulisan) return
+
+    const baseUrl = window.location.href.replace('index.html', '').replace(/#.*$/, '')
+    const link = baseUrl + 'view.html?id=' + tulisan.id
+    
+    // Sembunyikan semua link-box lain
+    document.querySelectorAll('.link-box').forEach(el => {
+        el.style.display = 'none'
+    })
+    
+    // Tampilkan link di bawah tombol yang ditekan
+    const linkBox = document.getElementById('link-' + id)
+    linkBox.textContent = '🔗 ' + link
+    linkBox.style.display = 'block'
+    
+    // Salin ke papan klip
+    navigator.clipboard.writeText(link).then(() => {
+        linkBox.innerHTML = '✅ Link disalin: <br>' + link
+    }).catch(() => {
+        linkBox.innerHTML = '🔗 Salin link ini: <br>' + link
+    })
+}
+
+function escapeHtml(teks) {
+    const div = document.createElement('div')
+    div.textContent = teks
+    return div.innerHTML
+}
+
+function tampilkan() {
+    const wadah = document.getElementById('daftarTulisan')
+    const daftar = ambilTulisan()
+    wadah.innerHTML = ''
+    
+    if (daftar.length === 0) {
+        wadah.innerHTML = '<p class="kosong">Belum ada tulisan.</p>'
+        return
+    }
+
+    for (let i = daftar.length - 1; i >= 0; i--) {
+        const item = daftar[i]
+        wadah.innerHTML += `
+            <div class="tulisan-item">
+                <h3>${escapeHtml(item.judul)}</h3>
+                <div class="tanggal">📅 ${item.tanggal}</div>
+                <div style="color:#cbd5e1; line-height:1.6; margin-bottom:10px;">${escapeHtml(item.isi).substring(0, 60)}${item.isi.length > 60 ? '...' : ''}</div>
+                <div class="btn-group">
+                    <button class="share-btn" onclick="bagikan(${item.id})">🔗 Bagikan</button>
+                    <button class="hapus-btn" onclick="hapusTulisan(${item.id})">🗑️ Hapus</button>
+                </div>
+                <div class="link-box" id="link-${item.id}"></div>
+            </div>
+        `
+    }
+}
+
+tampilkan()
+</script>
+</body>
+</html>
